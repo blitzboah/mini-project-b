@@ -1,32 +1,40 @@
 <%- include("partials/reg-header.ejs") %>
 
 <section class="register-section">
-    <div class="container container-fluid register-container">
-      <div class="reg-driver">
-        <h3>Register Your Drivers</h3>
-        <p>
-          Register the drivers related to your company. We keep track of their
-          license validity period. And notify you when the license is about to
-          expire, so you can ask your drivers to renew their license for
-          smooth functioning.
-        </p>
-        <div>
-          <button id="driverReg">Register</button>
-        </div>
-      </div>
-      <div class="reg-bus">
-        <h3>Register Your vehicles</h3>
-        <p>
-          Register the vehicles owned by your company. We keep the track of
-          the permit renewal of the vehicles, <br />for smooth functionallity
-          of your buisness without facing any legal issues.
-        </p>
-        <div>
-          <button id="busReg">Register</button>
-        </div>
+  <div class="container container-fluid register-container">
+    <div class="reg-driver">
+      <h3>Register Your Drivers</h3>
+      <p>
+        Register the drivers related to your company. We keep track of their
+        license validity period. And notify you when the license is about to
+        expire, so you can ask your drivers to renew their license for smooth
+        functioning.
+      </p>
+      <div>
+        <button id="driverReg">Register</button>
       </div>
     </div>
-  </section>
-</body>
-
-<%- include("footer.ejs") %>
+    <div class="reg-bus">
+      <h3>Register Your vehicles</h3>
+      <p>
+        Register the vehicles owned by your company. We keep the track of the
+        permit renewal of the vehicles, <br />for smooth functionallity of your
+        buisness without facing any legal issues.
+      </p>
+      <div>
+        <button id="busReg">Register</button>
+      </div>
+    </div>
+  </div>
+</section>
+<script type="text/javascript">
+  document.getElementById("driverReg").onclick = function () {
+    location.href = "./driverReg.php";
+  };
+</script>
+<script type="text/javascript">
+  document.getElementById("busReg").onclick = function () {
+    location.href = "./busReg.php";
+  };
+</script>
+<%- include("partials/footer.ejs") %>
