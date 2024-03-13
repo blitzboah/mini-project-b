@@ -1,0 +1,61 @@
+<%- include("partials/view-header.ejs") %>
+<body>
+  <nav
+    class="navbar navbar-expand-lg navbar-dark bg-dark"
+    style="padding: 50px"
+  >
+    <a class="navbar-brand" href="#" style="padding-left: 50px">BusInfo</a>
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-toggle="collapse"
+      data-target="#navbarNav"
+      aria-controls="navbarNav"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse n justify-content-end" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item active">
+          <a class="nav-link" href="index.php">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="register.php">Register</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="view.php">View</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+  <section class="register-section">
+    <div class="container container-fluid register-container">
+      <div class="reg-driver">
+        <h3>View Your Drivers</h3>
+        <p>View the drivers registered with your agency</p>
+        <div>
+          <button id="displayDriver">View</button>
+        </div>
+      </div>
+      <div class="reg-bus">
+        <h3>View Your Vehicles</h3>
+        <p>View the Vehicles registered with your agency.</p>
+        <div>
+          <button id="displayVehicles">View</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</body>
+<script type="text/javascript">
+  document.getElementById("displayDriver").onclick = function () {
+    location.href = "./displayDriver.php";
+  };
+</script>
+<script type="text/javascript">
+  document.getElementById("displayVehicles").onclick = function () {
+    location.href = "./displayVehicles.php";
+  };
+</script>
