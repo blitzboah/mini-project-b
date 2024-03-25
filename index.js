@@ -1,27 +1,18 @@
+import userRoutes from "./routes/user.routes.js";
 import express from "express";
-import bodyParser from "body-parser";
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-import { register } from "module";
+import session from "express-session";
 
-const app = express();
 const port = 3000;
-const __dirname = dirname(fileURLToPath(import.meta.url));
+const app = express();
 
-app.use(express.static("public"));
+app.use(session({
+  secret: 'your-secret-key',
+  resave: false,
+  saveUninitialized: true
+}));
 
-app.get("/", (req, res) => {
-  res.render("index.ejs");
-});
-
-app.get("/register", (req, res) => {
-  res.render("register.ejs");
-});
-
-app.get("/view", (req, res) => {
-  res.render("view.ejs");
-});
+app.use("/api/users", userRoutes);
 
 app.listen(port, () => {
-  console.log(`Listening on port ${port}`);
+  console.log(`Server running on port http://localhost:${port}`);
 });
