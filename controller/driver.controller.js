@@ -83,4 +83,35 @@ const login = async (req, res, cb) => {
   }
 };
 
+const tripsCompleted = async (req, res, cb) => {
+  try {
+    const tripId = await db.query(
+      "SELECT trip_id FROM trips WHERE trip_id=$1",
+      [req.body.tripId]
+    );
+    if (tripId.length === 0) {
+      return res.status(404).json({ message: "Trip not found" });
+    }
+    const driverId = await db.query("SELECT d_id FROM trips WHERE trip_id=$1", [
+      tripId,
+    ]);
+    const tripDuration = await db.query(
+      "SELECT trip_time FROM trips WHERE trip_id=$1",
+      [tripId[0].trip_id]
+    );
+    db.query(
+      "UPDATE drivers SET driving_hours=driving_hours+$1 WHERE d_id=$2",
+      [tripDuration[0].trip_time, driverId[0].d_id]
+    );
+    db.query("DELETE FROM assigned_trips WHERE trip_id = $1",[tripId[0].trip_id]);
+    db.query("DELETE FROM trips WHERE trip_id = $1",[tripId[0].trip_id]);
+    return res.status(200).json({ message: "Trip completed successfully" });
+  } catch (error) {
+    console.error("Error completing trip:", error);
+    res
+      .status(500)
+      .json({ message: "An error occurred while completing the trip" });
+  }
+};
+
 export { register, login };

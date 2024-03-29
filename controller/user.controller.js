@@ -77,4 +77,15 @@ const login = async (req, res, cb) => {
   }
 };
 
+const assignTasks = async (req, res, cb) => {
+  const tripDate = req.body.date;
+  const tripDuration = req.boy.duration;
+  try {
+    const result = await db.query("INSERT INTO trips (trip_date,trip_time) VALUES ($1,$2)",[tripDate,tripDuration]);
+    const driverDetails = await db.query("SELECT * FROM drivers")
+  } catch (error) {
+    
+  }
+};
+
 export { register, login };
