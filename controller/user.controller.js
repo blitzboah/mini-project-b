@@ -82,10 +82,28 @@ const assignTasks = async (req, res, cb) => {
   const tripDuration = req.boy.duration;
   try {
     const result = await db.query("INSERT INTO trips (trip_date,trip_time) VALUES ($1,$2)",[tripDate,tripDuration]);
-    const driverDetails = await db.query("SELECT * FROM drivers")
+    const driverDetails = await db.query("SELECT * FROM drivers");
+    const driverNumber = Math.floor(Math.random()*driverDetails.length);
+    const driver= driverDetails[driverNumber];
+    if(driverDetails[driverNumber].c_id === loggedInUser)
+    {
+      const assignedTrip = await db.query("INSET INTO assigned_trips VALUES ($1,$2)", [dri])
+    }
   } catch (error) {
     
   }
 };
+
+const loggedInUser = async (req,res,cb) => {
+  const loggedInUser = req.session.user;
+  if (loggedInUser) {
+    const companyId = loggedInUser.c_id;
+    console.log("Logged-in user company id:", companyId);
+    return companyId;
+  } else {
+    res.status(401).send("User not authenticated");
+    cb();
+  }
+}
 
 export { register, login };
