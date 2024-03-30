@@ -79,22 +79,30 @@ const login = async (req, res, cb) => {
 
 const assignTasks = async (req, res, cb) => {
   const tripDate = req.body.date;
-  const tripDuration = req.boy.duration;
+  const tripDuration = req.body.duration;
   try {
     const tripDetails = await db.query(
-      "INSERT INTO trips (trip_date,trip_time) VALUES ($1,$2) RETURNING *",
-      [tripDate, tripDuration]
+      "INSERT INTO trips (trip_date,trip_time,c_id) VALUES ($1,$2,$3) RETURNING *",
+      [tripDate, tripDuration, loggedInUser]
     );
     const driverDetails = await db.query("SELECT * FROM drivers");
-    const driverNumber = Math.floor(Math.random() * driverDetails.length);
-    const driver = driverDetails[driverNumber];
-    if (driver.c_id === loggedInUser) {
-      const assignedTrip = await db.query(
-        "INSET INTO assigned_trips VALUES ($1,$2)",
+    let assignedTrip;
+    let driverNumber;
+    let driver;
+    do {
+      driverNumber = Math.floor(Math.random() * driverDetails.length);
+      driver = driverDetails[driverNumber];
+      if (driver.c_id !== loggedInUser || driver.driving_hrs >= 48) {
+        continue;
+      }
+      assignedTrip = await db.query(
+        "INSERT INTO assigned_trips VALUES ($1,$2)",
         [driver.d_id, tripDetails.trip_id]
       );
-    }
-  } catch (error) {}
+    } while (!assignedTrip);
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 const loggedInUser = async (req, res, cb) => {
@@ -109,4 +117,4 @@ const loggedInUser = async (req, res, cb) => {
   }
 };
 
-export { register, login };
+export { register, login, assignTasks };
