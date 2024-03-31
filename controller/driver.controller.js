@@ -50,6 +50,7 @@ const register = async (req, res, next) => {
       const driverRegisteredCheck = result.rows.length;
       if (driverRegisteredCheck > 0) {
         console.log(`Driver is registered successfully.`);
+        res.status(200).send(`Driver was registered Successfully`);
       } else {
         console.log(`Driver was not able to register`);
       }
@@ -81,6 +82,7 @@ const login = async (req, res, cb) => {
             console.log(`Driver successfully logged in`);
             req.session.user = user;
             cb();
+            res.redirect("/api/drivers/index");
           } else {
             res.send("Incorrect Password");
           }
@@ -94,29 +96,56 @@ const login = async (req, res, cb) => {
 
 const tripsCompleted = async (req, res, cb) => {
   try {
-    const tripId = await db.query(
-      "SELECT trip_id FROM trips WHERE trip_id=$1",
+    const trip = await db.query(
+      "SELECT trip_id, trip_time FROM trips WHERE trip_id=$1",
       [req.body.tripId]
     );
-    if (tripId.length === 0) {
+    const tripId = trip.rows[0].trip_id;
+    const tripDuration = trip.rows[0].trip_time;
+    console.log(tripId);
+    if (!tripId) {
       return res.status(404).json({ message: "Trip not found" });
     }
-    const driverId = await db.query(
-      "SELECT d_id FROM assigned_trips WHERE trip_id=$1",
-      [tripId[0].trip_id]
+    const driver = await db.query(
+      "SELECT * FROM assigned_trips WHERE trip_id=$1",
+      [tripId]
     );
-    const tripDuration = await db.query(
-      "SELECT trip_time FROM trips WHERE trip_id=$1",
-      [tripId[0].trip_id]
-    );
-    db.query(
-      "UPDATE drivers SET driving_hours=driving_hours+$1 WHERE d_id=$2",
-      [tripDuration[0].trip_time, driverId[0].d_id]
-    );
-    db.query("DELETE FROM assigned_trips WHERE trip_id = $1", [
-      tripId[0].trip_id,
-    ]);
-    db.query("DELETE FROM trips WHERE trip_id = $1", [tripId[0].trip_id]);
+    const driverId = driver.rows[0].d_id;
+    const drivingHrs = driver.rows[0].driving_hrs;
+    console.log(tripDuration);
+    if (drivingHrs === null) {
+      await db.query("BEGIN");
+      const updateResult = await db.query(
+        "UPDATE drivers SET driving_hrs=$1 WHERE d_id=$2",
+        [tripDuration, driverId]
+      );
+      await db.query("COMMIT");
+      if (updateResult.rowCount > 0) {
+        console.log(`Driving hours successfully updated`);
+      } else {
+        console.log(`No rows were updated`);
+      }
+    } else {
+      await db.query("BEGIN");
+      const updateResult = await db.query(
+        "UPDATE drivers SET driving_hrs=driving_hrs+$1 WHERE d_id=$2",
+        [tripDuration, driverId]
+      );
+      await db.query("COMMIT");
+      if (updateResult.rowCount > 0) {
+        console.log(`Driving hours successfully updated`);
+      } else {
+        console.log(`No rows were updated`);
+      }
+    }
+    if (
+      await db.query("DELETE FROM assigned_trips WHERE trip_id = $1", [tripId])
+    ) {
+      console.log(`Trip deleted from assigned trips table`);
+    }
+    if (await db.query("DELETE FROM trips WHERE trip_id = $1", [tripId])) {
+      console.log(`Trip deleted from trips table`);
+    }
     return res.status(200).json({ message: "Trip completed successfully" });
   } catch (error) {
     console.error("Error completing trip:", error);
@@ -126,4 +155,18 @@ const tripsCompleted = async (req, res, cb) => {
   }
 };
 
-export { register, login, tripsCompleted };
+
+const logout = (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.log("Error destroying session:", err);
+      res.status(500).send("Internal Server Error");
+    } else {
+      console.log("User logged out successfully");
+      res.redirect("/api/drivers/login"); // Redirect to login page after logout
+    }
+  });
+};
+
+
+export { register, login, tripsCompleted,logout };

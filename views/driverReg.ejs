@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Driver Registration</title>
+</head>
+<body>
+  <h1>Driver Registration Form</h1>
+  <form id="registrationForm" action="/api/drivers/register" method="POST">
+    <label for="companyName">Company Name:</label>
+    <input type="text" id="companyName" name="companyName" required><br><br>
+
+    <label for="driverName">Driver Name:</label>
+    <input type="text" id="driverName" name="driverName" required><br><br>
+
+    <label for="phoneNo">Phone Number:</label>
+    <input type="text" id="phoneNo" name="phoneNo" required><br><br>
+
+    <label for="licenseNo">License Number:</label>
+    <input type="text" id="licenseNo" name="licenseNo" required><br><br>
+
+    <label for="driverAddress">Driver Address:</label>
+    <input type="text" id="driverAddress" name="driverAddress" required><br><br>
+
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password" required><br><br>
+
+    <label for="expiryDate">License Expiry Date:</label>
+    <input type="date" id="expiryDate" name="expiryDate" required><br><br>
+
+    <button type="submit">Register</button>
+  </form>
+</body>
+</html>
