@@ -50,6 +50,7 @@ const register = async (req, res, next) => {
       const driverRegisteredCheck = result.rows.length;
       if (driverRegisteredCheck > 0) {
         console.log(`Driver is registered successfully.`);
+        res.status(200).send(`Driver was registered Successfully`);
       } else {
         console.log(`Driver was not able to register`);
       }
@@ -81,6 +82,7 @@ const login = async (req, res, cb) => {
             console.log(`Driver successfully logged in`);
             req.session.user = user;
             cb();
+            res.redirect("/api/drivers/index");
           } else {
             res.send("Incorrect Password");
           }
@@ -153,4 +155,18 @@ const tripsCompleted = async (req, res, cb) => {
   }
 };
 
-export { register, login, tripsCompleted };
+
+const logout = (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.log("Error destroying session:", err);
+      res.status(500).send("Internal Server Error");
+    } else {
+      console.log("User logged out successfully");
+      res.redirect("/api/drivers/login"); // Redirect to login page after logout
+    }
+  });
+};
+
+
+export { register, login, tripsCompleted,logout };
