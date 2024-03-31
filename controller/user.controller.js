@@ -81,18 +81,28 @@ const assignTasks = async (req, res, cb) => {
   const tripDate = req.body.date;
   const tripDuration = req.body.duration;
   try {
+    const companyId = await getLoggedInUserCompanyId(req);
+    // const companyId = 1;
     const tripDetails = await db.query(
       "INSERT INTO trips (trip_date,trip_time,c_id) VALUES ($1,$2,$3) RETURNING *",
-      [tripDate, tripDuration, loggedInUser]
+      [tripDate, tripDuration, companyId]
     );
-    const driverDetails = await db.query("SELECT * FROM drivers");
+    const trip_id = tripDetails.rows[0].trip_id;
     let assignedTrip;
     let driverNumber;
     let driver;
     do {
-      driverNumber = Math.floor(Math.random() * driverDetails.length);
-      driver = driverDetails[driverNumber];
-      if (driver.c_id !== loggedInUser || driver.driving_hrs >= 48) {
+      const trips = await db.query("SELECT * FROM trips WHERE trip_id=$1", [
+        trip_id,
+      ]);
+      const tripDetails = trips.rows[0];
+      const driverDetails = await db.query("SELECT * FROM drivers");
+      const drivers = driverDetails.rows;
+      driverNumber = Math.floor(Math.random() * drivers.length);
+      driver = drivers[driverNumber];
+      const driverNo = driver.c_id;
+      const driverDrivingHrs = driver.driving_hrs;
+      if (driverNo !== companyId || driverDrivingHrs >= 48) {
         continue;
       }
       assignedTrip = await db.query(
@@ -100,21 +110,18 @@ const assignTasks = async (req, res, cb) => {
         [driver.d_id, tripDetails.trip_id]
       );
     } while (!assignedTrip);
+    cb();
   } catch (error) {
     console.log(error);
   }
 };
 
-const loggedInUser = async (req, res, cb) => {
+const getLoggedInUserCompanyId = async (req) => {
   const loggedInUser = req.session.user;
-  if (loggedInUser) {
-    const companyId = loggedInUser.c_id;
-    console.log("Logged-in user company id:", companyId);
-    return companyId;
-  } else {
-    res.status(401).send("User not authenticated");
-    cb();
+  if (!loggedInUser) {
+    throw new Error("User not authenticated");
   }
+  return loggedInUser.c_id;
 };
 
 export { register, login, assignTasks };
