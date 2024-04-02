@@ -2,6 +2,10 @@ import React from 'react';
 import './App.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheckCircle, faUsers, faHeart } from '@fortawesome/free-solid-svg-icons';
+import { faTwitter, faFacebook, faInstagram, faYoutube } from '@fortawesome/free-brands-svg-icons';
+
+import Register from './register';
+
 
 function Navbar() {
   return (
@@ -60,7 +64,7 @@ function Features() {
 
 function CTA() {
   return (
-    <section className="colored-section" id="cta">
+    <section className="bg-gray-700 text-white p-10">
       <div className="container-fluid">
         <h3 className="service-heading">Get the Right Service for your Business</h3>
         <p className="service" style={{ fontSize: '1.15rem' }}>
@@ -74,12 +78,12 @@ function CTA() {
 
 function Footer() {
   return (
-    <footer id="footer" className="container-fluid white-section">
-      <button className="btn btn-lg"><i className="fa-brands fa-twitter"></i></button>
-      <button className="btn btn-lg"><i className="fa-brands fa-facebook"></i></button>
-      <button className="btn btn-lg"><i className="fa-brands fa-instagram"></i></button>
-      <button className="btn btn-lg"><i className="fa-solid fa-envelope "></i></button>
-      <p>© Copyright BusInfo</p>
+    <footer id="footer" className="bg-gray-500 py-4">
+      <button className="btn btn-lg mr-4"><FontAwesomeIcon icon={faTwitter} /></button>
+      <button className="btn btn-lg mr-4"><FontAwesomeIcon icon={faFacebook} /></button>
+      <button className="btn btn-lg mr-4"><FontAwesomeIcon icon={faInstagram} /></button>
+      <button className="btn btn-lg mr-4"><FontAwesomeIcon icon={faYoutube} /></button>
+      <p style={{color: '#fff'}}>© Copyright BusInfo</p>
     </footer>
   );
 }
