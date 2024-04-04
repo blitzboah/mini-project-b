@@ -1,22 +1,15 @@
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser } from '@fortawesome/free-solid-svg-icons/faUser';
-import './bg.css'
-
+import './bg.css';
 
 function Navbar() {
-    return (
-      <nav className="flex justify-center items-center flex-wrap bg-gray-900 p-4">
-        <a className="text-yellow-300 underline-none mr-auto text-xl" href="#">BusInfo</a>
-        <div className="flex justify-center items-center space-x-4">
-          <a className="text-white hover:text-yellow-300 underline-none" href="#">Home</a>
-          <a className="text-white hover:text-yellow-300 underline-none" href="#">Register</a>
-          <a className="text-white hover:text-yellow-300 underline-none" href="#">View</a>
-          <a className="text-white hover:text-yellow-300 underline-none" href="#">Logout</a>
-        </div>
-      </nav>
-    );
-  }
+  return (
+    <nav className="flex justify-center items-center flex-wrap bg-gray-900 p-4">
+      <a className="text-yellow-300 underline-none mr-auto text-xl" href="#">BusInfo</a>
+    </nav>
+  );
+}
 
 function DriverForms() {
   const [formData, setFormData] = useState({
@@ -48,113 +41,136 @@ function DriverForms() {
   };
 
   return (
-    <div className="flex justify-center items-center h-screen">
-      <div className="text-white bg-gray-800 p-6 rounded-lg text-center max-w-md">
-        <div className="mb-4">
+    <div className="flex justify-center items-center h-screen bg-gray-900">
+      <div className="bg-white shadow-lg rounded-lg p-8 max-w-md w-full">
+        <div className="mb-4 text-center">
           <FontAwesomeIcon icon={faUser} className="text-5xl text-blue-500 mb-2" />
           <h2 className="text-2xl font-bold">Register Your Drivers</h2>
         </div>
         <form onSubmit={handleSubmit} className="space-y-5">
-          <div className="input-group">
-            <label className="mr-2">Registration Number:</label>
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="registrationNumber">Registration Number:</label>
             <input
               type="text"
               name="registrationNumber"
               value={formData.registrationNumber}
               onChange={handleInputChange}
               required
-              className="input-field"
+              className="appearance-none bg-transparent border-b-2 border-blue-500 w-full text-gray-700 py-1 px-3 leading-tight focus:outline-none focus:border-blue-700"
             />
           </div>
-          <div className="input-group">
-            <label className="mr-2">Driver Name:</label>
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="registrationNumber">Registration Number:</label>
             <input
               type="text"
-              name="driverName"
-              value={formData.driverName}
+              name="registrationNumber"
+              value={formData.registrationNumber}
               onChange={handleInputChange}
               required
-              className="input-field"
+              className="appearance-none bg-transparent border-b-2 border-blue-500 w-full text-gray-700 py-1 px-3 leading-tight focus:outline-none focus:border-blue-700"
             />
           </div>
-          <div className="input-group">
-            <label className="mr-2">Driver Address:</label>
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="registrationNumber">Registration Number:</label>
             <input
               type="text"
-              name="driverAddress"
-              value={formData.driverAddress}
+              name="registrationNumber"
+              value={formData.registrationNumber}
               onChange={handleInputChange}
               required
-              className="input-field"
+              className="appearance-none bg-transparent border-b-2 border-blue-500 w-full text-gray-700 py-1 px-3 leading-tight focus:outline-none focus:border-blue-700"
             />
           </div>
-          <div className="input-group">
-            <label className="mr-2">Driver Phone Number:</label>
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="registrationNumber">Registration Number:</label>
             <input
               type="text"
-              name="driverPhone"
-              value={formData.driverPhone}
+              name="registrationNumber"
+              value={formData.registrationNumber}
               onChange={handleInputChange}
               required
-              className="input-field"
+              className="appearance-none bg-transparent border-b-2 border-blue-500 w-full text-gray-700 py-1 px-3 leading-tight focus:outline-none focus:border-blue-700"
             />
           </div>
-          <div className="input-group">
-            <label className="mr-2">Driver Photo:</label>
-            <input
-              type="file"
-              id="driverPhoto"
-              name="driverPhoto"
-              accept=".jpg,.jpeg,.png"
-              onChange={handleFileChange}
-              required
-            />
-          </div>
-          <div className="input-group">
-            <label className="mr-2">License Number:</label>
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="registrationNumber">Registration Number:</label>
             <input
               type="text"
-              name="licenseNumber"
-              value={formData.licenseNumber}
+              name="registrationNumber"
+              value={formData.registrationNumber}
               onChange={handleInputChange}
               required
-              className="input-field"
+              className="appearance-none bg-transparent border-b-2 border-blue-500 w-full text-gray-700 py-1 px-3 leading-tight focus:outline-none focus:border-blue-700"
             />
           </div>
-          <div className="input-group">
-            <label className="mr-2">License Photo:</label>
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="registrationNumber">Registration Number:</label>
             <input
-              type="file"
-              id="licensePhoto"
-              name="licensePhoto"
-              accept=".jpg,.jpeg,.png"
-              onChange={handleFileChange}
-              required
-            />
-          </div>
-          <div className="input-group">
-            <label className="mr-2">Date of Expiry of license:</label>
-            <input
-              type="date"
-              name="dateOfExpiry"
-              value={formData.dateOfExpiry}
+              type="text"
+              name="registrationNumber"
+              value={formData.registrationNumber}
               onChange={handleInputChange}
-              min={new Date().toISOString().split('T')[0]}
               required
+              className="appearance-none bg-transparent border-b-2 border-blue-500 w-full text-gray-700 py-1 px-3 leading-tight focus:outline-none focus:border-blue-700"
             />
           </div>
-          <div className="input-group">
-            <label className="mr-2">Date of Joining:</label>
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="registrationNumber">Registration Number:</label>
             <input
-              type="date"
-              name="dateOfJoining"
-              value={formData.dateOfJoining}
+              type="text"
+              name="registrationNumber"
+              value={formData.registrationNumber}
               onChange={handleInputChange}
-              max={new Date().toISOString().split('T')[0]}
               required
+              className="appearance-none bg-transparent border-b-2 border-blue-500 w-full text-gray-700 py-1 px-3 leading-tight focus:outline-none focus:border-blue-700"
             />
           </div>
-          <button type="submit" className="bg-blue-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="registrationNumber">Registration Number:</label>
+            <input
+              type="text"
+              name="registrationNumber"
+              value={formData.registrationNumber}
+              onChange={handleInputChange}
+              required
+              className="appearance-none bg-transparent border-b-2 border-blue-500 w-full text-gray-700 py-1 px-3 leading-tight focus:outline-none focus:border-blue-700"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="registrationNumber">Registration Number:</label>
+            <input
+              type="text"
+              name="registrationNumber"
+              value={formData.registrationNumber}
+              onChange={handleInputChange}
+              required
+              className="appearance-none bg-transparent border-b-2 border-blue-500 w-full text-gray-700 py-1 px-3 leading-tight focus:outline-none focus:border-blue-700"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="registrationNumber">Registration Number:</label>
+            <input
+              type="text"
+              name="registrationNumber"
+              value={formData.registrationNumber}
+              onChange={handleInputChange}
+              required
+              className="appearance-none bg-transparent border-b-2 border-blue-500 w-full text-gray-700 py-1 px-3 leading-tight focus:outline-none focus:border-blue-700"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="registrationNumber">Registration Number:</label>
+            <input
+              type="text"
+              name="registrationNumber"
+              value={formData.registrationNumber}
+              onChange={handleInputChange}
+              required
+              className="appearance-none bg-transparent border-b-2 border-blue-500 w-full text-gray-700 py-1 px-3 leading-tight focus:outline-none focus:border-blue-700"
+            />
+          </div>
+          
+          <button type="submit" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
             Register
           </button>
         </form>

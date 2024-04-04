@@ -1,8 +1,17 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEnvelope, faLock } from '@fortawesome/free-solid-svg-icons';
+import './bg.css'
 
-function Login() {
+function Navbar() {
+  return (
+    <nav className="flex justify-center items-center flex-wrap bg-gray-900 p-4">
+      <a className="text-yellow-300 underline-none mr-auto text-xl" href="#">BusInfo</a>
+    </nav>
+  );
+}
+
+function Log() {
   return (
     <div className="flex justify-center items-center h-screen bg-gray-900">
       <div className="bg-white shadow-lg rounded-lg p-8 max-w-md w-full">
@@ -32,4 +41,12 @@ function Login() {
   );
 }
 
+function Login(){
+  return(
+    <>
+    <Navbar/>
+    <Log/>
+    </>
+  )
+}
 export default Login;
