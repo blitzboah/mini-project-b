@@ -163,7 +163,7 @@ const logout = (req, res) => {
       res.status(500).send("Internal Server Error");
     } else {
       console.log("User logged out successfully");
-      res.redirect("/api/drivers/login"); // Redirect to login page after logout
+      res.redirect("/api/drivers/login");
     }
   });
 };

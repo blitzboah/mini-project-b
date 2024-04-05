@@ -1,40 +1,59 @@
 <%- include("partials/reg-header.ejs") %>
 
-<section class="register-section">
-  <div class="container container-fluid register-container">
-    <div class="reg-driver">
-      <h3>Register Your Drivers</h3>
-      <p>
-        Register the drivers related to your company. We keep track of their
-        license validity period. And notify you when the license is about to
-        expire, so you can ask your drivers to renew their license for smooth
-        functioning.
-      </p>
-      <div>
-        <button id="driverReg">Register</button>
+<body>
+  <nav
+    class="navbar navbar-expand-lg navbar-dark bg-dark"
+    style="padding: 50px"
+  >
+    <a class="navbar-brand" href="#" style="padding-left: 50px">BusInfo</a>
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-toggle="collapse"
+      data-target="#navbarNav"
+      aria-controls="navbarNav"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse n justify-content-end" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item active">
+          <a class="nav-link" href="/">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="drivers">Drivers</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+  <section class="register-section">
+    <div class="container container-fluid register-container">
+      <div class="reg-driver">
+        <h3>Register Your Drivers</h3>
+        <p>
+          Register the drivers related to your company. We keep track of their
+          license validity period. And notify you when the license is about to
+          expire, so you can ask your drivers to renew their license for smooth
+          functioning.
+        </p>
+        <div>
+          <button id="driverReg">Register</button>
+        </div>
+      </div>
+      <div class="reg-bus">
+        <h3>Register Your vehicles</h3>
+        <p>
+          Register the vehicles owned by your company. We keep the track of the
+          permit renewal of the vehicles, <br />for smooth functionallity of
+          your buisness without facing any legal issues.
+        </p>
+        <div>
+          <button id="busReg">Register</button>
+        </div>
       </div>
     </div>
-    <div class="reg-bus">
-      <h3>Register Your vehicles</h3>
-      <p>
-        Register the vehicles owned by your company. We keep the track of the
-        permit renewal of the vehicles, <br />for smooth functionallity of your
-        buisness without facing any legal issues.
-      </p>
-      <div>
-        <button id="busReg">Register</button>
-      </div>
-    </div>
-  </div>
-</section>
-<script type="text/javascript">
-  document.getElementById("driverReg").onclick = function () {
-    location.href = "./driverReg.php";
-  };
-</script>
-<script type="text/javascript">
-  document.getElementById("busReg").onclick = function () {
-    location.href = "./busReg.php";
-  };
-</script>
-<%- include("partials/footer.ejs") %>
+  </section>
+  <%- include("partials/footer.ejs") %>
+</body>
