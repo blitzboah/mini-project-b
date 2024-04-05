@@ -1,7 +1,12 @@
 import db from "../database/db.js";
 import { Router } from "express";
 import express from "express";
-import { assignTasks, login, register } from "../controller/user.controller.js";
+import {
+  assignTasks,
+  login,
+  register,
+  sendDrivers,
+} from "../controller/user.controller.js";
 
 const router = Router();
 
@@ -23,6 +28,11 @@ router.post("/trips", isAuthenticated, assignTasks);
 router.get("/drivers", (req, res) => {
   res.redirect("/api/drivers/login");
 });
+app.get(
+  "/viewDrivers",
+  isAuthenticated,
+  res.render("viewDrivers.ejs", { users: sendDrivers })
+);
 
 db.connect();
 

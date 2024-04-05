@@ -116,9 +116,13 @@ const assignTasks = async (req, res, cb) => {
   }
 };
 
-const sendDrivers = async(req,res,cb) => {
-  const result = db.query("SELECT * FROM drivers WHERE c_id=$1",[getLoggedInUserCompanyId]);
-}
+const sendDrivers = async (req, res, cb) => {
+  const result = await db.query("SELECT * FROM drivers WHERE c_id=$1", [
+    getLoggedInUserCompanyId,
+  ]);
+  const users = result.rows;
+  return users;
+};
 
 const getLoggedInUserCompanyId = async (req) => {
   const loggedInUser = req.session.user;
@@ -128,6 +132,4 @@ const getLoggedInUserCompanyId = async (req) => {
   return loggedInUser.c_id;
 };
 
-
-
-export { register, login, assignTasks };
+export { register, login, assignTasks, sendDrivers };
