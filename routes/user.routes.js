@@ -28,11 +28,9 @@ router.post("/trips", isAuthenticated, assignTasks);
 router.get("/drivers", (req, res) => {
   res.redirect("/api/drivers/login");
 });
-app.get(
-  "/viewDrivers",
-  isAuthenticated,
-  res.render("viewDrivers.ejs", { users: sendDrivers })
-);
+router.get("/viewDrivers", isAuthenticated, (req, res) => {
+  res.render("viewDrivers.ejs", { users: sendDrivers });
+});
 
 db.connect();
 
