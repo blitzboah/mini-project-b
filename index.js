@@ -1,5 +1,6 @@
 import userRoutes from "./routes/user.routes.js";
 import driverRoutes from "./routes/driver.routes.js";
+import defaultRoutes from "./routes/default.routes.js";
 import express from "express";
 import session from "express-session";
 import db from "./database/db.js";
@@ -19,6 +20,7 @@ app.use(
   })
 );
 
+app.use("/", defaultRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/drivers", driverRoutes);
 

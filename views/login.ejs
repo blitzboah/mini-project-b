@@ -1,65 +1,89 @@
-<%- include("partials/header.ejs") %>
-<body>
-    <div class="loging">
-      <div class="loging-child"></div>
-      <div class="loging-item"></div>
-      <div class="login-to-businfo">Login To BusInfo</div>
-      <div class="component-1">
-        <div class="component-1-child"></div>
-        <img class="user-solid-1-icon" alt="" src="./public/usersolid-1.svg" />
-        <form  method="post">
-        <input
-          class="username"
-          name="email"
-          placeholder="E-mail"
-          type="email"
-        />
-    
-      </div>
-      <div class="component-2">
-        <div class="component-1-child"></div>
-        
-        <input
-          class="password"
-          name="password"
-          placeholder="Password"
-          type="password"
-        />
-       
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>BusInfo</title>
 
-        <img class="lock-solid-1-icon" alt="" src="./public/locksolid-1.svg" />
-      </div>
-      <div class="dont-have-an">Don’t have an account?</div>
-      <a class="sign-up-now" href="signup.php" id="signUpNow"
-        >Sign Up now</a
+    <!-- Bootstrap -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi"
+      crossorigin="anonymous"
+    />
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3"
+      crossorigin="anonymous"
+    ></script>
+
+    <!-- CSS stylesheets -->
+    <link rel="stylesheet" href="/styles.css" />
+
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;900&family=Ubuntu&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=ADLaM+Display&family=Cabin:wght@600;700&family=Dosis:wght@200;300;400;500;600;700;800&family=Handlee&family=Lobster&family=Playpen+Sans:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Fontawesome -->
+    <script
+      src="https://kit.fontawesome.com/6ce188fd6f.js"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+
+  <body>
+    <nav
+      class="navbar navbar-expand-lg navbar-dark bg-dark"
+      style="padding: 50px"
+    >
+      <a class="navbar-brand" href="#" style="padding-left: 50px">BusInfo</a>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-toggle="collapse"
+        data-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
       >
-      <button class="loging-inner" id="rectangleButton" type="submit" name="login"><div class="login2"></div>Login</button>
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div
+        class="collapse navbar-collapse n justify-content-end"
+        id="navbarNav"
+      >
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item active">
+            <a class="nav-link" href="/">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="drivers">Drivers</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <h1>Login</h1>
+    <form action="/api/users/login" method="POST">
+      <label for="phoneNo">Email:</label>
+      <input type="text" id="email" name="email" required /><br /><br />
 
-      </form>
-      <div class="loging-child1"></div>
-      <div class="loging-child2"></div>
-      <div class="loging-child3"></div>
-      <div class="loging-child4"></div>
-      <div class="loging-child5"></div>
-      <div class="loging-child6"></div>
-      <div class="loging-child7"></div>
-      <div class="loging-child8"></div>
-      <div class="loging-child9"></div>
-      <div class="loging-child10"></div>
-      <div class="loging-child11"></div>
-      <div class="loging-child12"></div>
-      <img class="loging-child13" alt="" src="./public/polygon-6.svg" />
+      <label for="password">Password:</label>
+      <input
+        type="password"
+        id="password"
+        name="password"
+        required
+      /><br /><br />
 
-      <img class="loging-child14" alt="" src="./public/polygon-6.svg" />
-
-      <img class="loging-child15" alt="" src="./public/polygon-8.svg" />
-
-      <img class="loging-child16" alt="" src="./public/polygon-9.svg" />
-
-      <img class="user-solid-2-icon" alt="" src="./public/usersolid-2.svg" />
-
-      <img class="file-solid-2-icon" alt="" src="./public/filesolid-2.svg" />
-    </div>
-
+      <button type="submit">Login</button>
+    </form>
+    <p>Not registered yet? <a href="/api/users/register">Register</a></p>
   </body>
-  <%- include("partials/footer.ejs") %>
+</html>
