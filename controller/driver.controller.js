@@ -82,7 +82,7 @@ const login = async (req, res, cb) => {
             console.log(`Driver successfully logged in`);
             req.session.user = user;
             cb();
-            res.redirect("/api/drivers/index");
+            res.redirect("/api/drivers/logindex");
           } else {
             res.send("Incorrect Password");
           }

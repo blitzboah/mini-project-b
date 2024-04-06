@@ -82,7 +82,6 @@ const assignTasks = async (req, res, cb) => {
   const tripDuration = req.body.duration;
   try {
     const companyId = await getLoggedInUserCompanyId(req);
-    // const companyId = 1;
     const tripDetails = await db.query(
       "INSERT INTO trips (trip_date,trip_time,c_id) VALUES ($1,$2,$3) RETURNING *",
       [tripDate, tripDuration, companyId]
@@ -116,12 +115,14 @@ const assignTasks = async (req, res, cb) => {
   }
 };
 
-const sendDrivers = async (req, res, cb) => {
-  const result = await db.query("SELECT * FROM drivers WHERE c_id=$1", [
-    getLoggedInUserCompanyId,
-  ]);
-  const users = result.rows;
-  return users;
+const sendDrivers = async (req, res) => {
+  try {
+    const result = await db.query("SELECT * FROM drivers WHERE c_id=1");
+    res.render("viewDrivers.ejs", { users: result.rows });
+  } catch (error) {
+    console.error("Error rendering viewDrivers:", error);
+    res.status(500).send("Internal Server Error");
+  }
 };
 
 const getLoggedInUserCompanyId = async (req) => {

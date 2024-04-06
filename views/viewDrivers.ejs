@@ -73,6 +73,7 @@
     </nav>
     <br />
     <br />
+    <% console.log(users) %>
     <table border="1">
       <thead>
         <tr>
@@ -84,14 +85,13 @@
       <tbody>
         <% for (let i = 0; i < users.length; i++) { %>
         <tr>
-          <td><%= users[i].driver_name %></td>
-          <td><%= users[i].driver_licno %></td>
-          <td><%= users[i].driver_phno %></td>
+          <td><%= users[i].driver_name || ' ' %></td>
+          <td><%= users[i].driver_licno || ' ' %></td>
+          <td><%= users[i].driver_phno || ' ' %></td>
         </tr>
         <% } %>
       </tbody>
     </table>
 
     <%- include("partials/footer.ejs") %>
-  </body>
-</html>
+

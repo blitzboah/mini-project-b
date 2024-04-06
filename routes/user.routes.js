@@ -5,7 +5,7 @@ import {
   assignTasks,
   login,
   register,
-  sendDrivers,
+  sendDrivers
 } from "../controller/user.controller.js";
 
 const router = Router();
@@ -28,9 +28,7 @@ router.post("/trips", isAuthenticated, assignTasks);
 router.get("/drivers", (req, res) => {
   res.redirect("/api/drivers/login");
 });
-router.get("/viewDrivers", isAuthenticated, (req, res) => {
-  res.render("viewDrivers.ejs", { users: sendDrivers });
-});
+router.get("/viewDrivers", isAuthenticated,sendDrivers);
 
 db.connect();
 

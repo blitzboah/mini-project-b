@@ -13,12 +13,17 @@ const router = Router();
 router.use(express.urlencoded({ extended: true }));
 const isAuthenticated = (req, res, next) => {
   if (req.session.user) {
+    // User is authenticated, proceed to the next middleware
     next();
   } else {
+    // User is not authenticated, redirect to the login page
     res.redirect("/api/drivers/login");
   }
 };
 
+router.get("/logindex", isAuthenticated, (req,res)=>{
+  res.render("driverIndex.ejs");
+});
 router.get("/login", (req, res) => {
   res.render("driverLogin.ejs");
 });
@@ -30,11 +35,8 @@ router.get("/index", isAuthenticated, (req, res) => {
 });
 router.post("/login", login);
 router.post("/register", register);
-router.post("/trips", isAuthenticated, tripsCompleted);
+router.post("/trips", tripsCompleted);
 router.get("/logout", logout);
-router.get("/company", (req, res) => {
-  res.redirect("/api/users/login");
-});
 
 db.connect();
 
