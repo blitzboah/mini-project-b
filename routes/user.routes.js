@@ -4,8 +4,11 @@ import express from "express";
 import {
   assignTasks,
   login,
+  logout,
+  regiserVehicles,
   register,
-  sendDrivers
+  sendDrivers,
+  sendVehicels,
 } from "../controller/user.controller.js";
 
 const router = Router();
@@ -22,13 +25,22 @@ const isAuthenticated = (req, res, next) => {
 router.get("/login", (req, res) => {
   res.render("login.ejs");
 });
+router.get("/index", isAuthenticated, (req, res) => {
+  res.render("companyIndex.ejs");
+});
 router.post("/login", login);
 router.post("/register", register);
 router.post("/trips", isAuthenticated, assignTasks);
 router.get("/drivers", (req, res) => {
   res.redirect("/api/drivers/login");
 });
-router.get("/viewDrivers", isAuthenticated,sendDrivers);
+router.get("/viewDrivers", isAuthenticated, sendDrivers);
+router.get("/logout", logout);
+router.get("/registerVehicle", (req, res) => {
+  res.render("vehicleRegistration.ejs");
+});
+router.post("/registerVehicle", regiserVehicles);
+router.get("/viewVehicles",isAuthenticated,sendVehicels)
 
 db.connect();
 

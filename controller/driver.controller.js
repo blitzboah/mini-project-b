@@ -82,7 +82,7 @@ const login = async (req, res, cb) => {
             console.log(`Driver successfully logged in`);
             req.session.user = user;
             cb();
-            res.redirect("/api/drivers/logindex");
+            res.redirect("/api/drivers/index");
           } else {
             res.send("Incorrect Password");
           }
@@ -155,6 +155,38 @@ const tripsCompleted = async (req, res, cb) => {
   }
 };
 
+const sendTrips = async (req, res) => {
+  try {
+    const driverId = await getLoggedInUserCompanyId(req);
+    const assignedTrips = await db.query(
+      "SELECT trip_id FROM assigned_trips WHERE d_id=$1",
+      [driverId]
+    );
+    const tripsDetails = [];
+    for (const tripRow of assignedTrips.rows) {
+      const tripId = tripRow.trip_id;
+      const tripDetails = await db.query(
+        "SELECT * FROM trips WHERE trip_id=$1",
+        [tripId]
+      );
+      if (tripDetails.rows.length > 0) {
+        tripsDetails.push(tripDetails.rows[0]);
+      }
+    }
+    res.render("viewTrips.ejs", { trips: tripsDetails });
+  } catch (error) {
+    console.error("Error rendering viewDrivers:", error);
+    res.status(500).send("Internal Server Error");
+  }
+};
+
+const getLoggedInUserCompanyId = async (req) => {
+  const loggedInUser = req.session.user;
+  if (!loggedInUser) {
+    throw new Error("User not authenticated");
+  }
+  return loggedInUser.d_id;
+};
 
 const logout = (req, res) => {
   req.session.destroy((err) => {
@@ -169,4 +201,4 @@ const logout = (req, res) => {
 };
 
 
-export { register, login, tripsCompleted,logout };
+export { register, login, tripsCompleted, sendTrips, logout };

@@ -5,6 +5,7 @@ import {
   login,
   logout,
   register,
+  sendTrips,
   tripsCompleted,
 } from "../controller/driver.controller.js";
 
@@ -13,17 +14,13 @@ const router = Router();
 router.use(express.urlencoded({ extended: true }));
 const isAuthenticated = (req, res, next) => {
   if (req.session.user) {
-    // User is authenticated, proceed to the next middleware
     next();
   } else {
-    // User is not authenticated, redirect to the login page
     res.redirect("/api/drivers/login");
   }
 };
 
-router.get("/logindex", isAuthenticated, (req,res)=>{
-  res.render("driverIndex.ejs");
-});
+router.get("/trips", isAuthenticated, sendTrips);
 router.get("/login", (req, res) => {
   res.render("driverLogin.ejs");
 });
@@ -31,7 +28,7 @@ router.get("/register", (req, res) => {
   res.render("driverReg.ejs");
 });
 router.get("/index", isAuthenticated, (req, res) => {
-  res.render("index.ejs");
+  res.render("driverIndex.ejs");
 });
 router.post("/login", login);
 router.post("/register", register);
