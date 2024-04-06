@@ -11,7 +11,7 @@ function Navbar() {
   );
 }
 
-function Log() {
+function SignUp() {
   const [showSlide, setShowSlide] = useState(false); // State to track slide visibility
   const [userType, setUserType] = useState('driver');
 
@@ -90,19 +90,18 @@ function Log() {
           </button>
           <a className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800" href="#">Forgot Password?</a>
         </div>
-        <div className="mt-4 text-center text-gray-600">Don't have an account? <a className="text-blue-500 hover:underline" href="#">Sign up here</a></div>
       </div>
     </div>
   );
 }
 
-function Login() {
+function Sign() {
   return (
     <>
       <Navbar />
-      <Log />
+      <SignUp />
     </>
   );
 }
 
-export default Login;
+export default Sign;
