@@ -65,6 +65,7 @@ const login = async (req, res, cb) => {
           if (result) {
             console.log(`user successfully logged in`);
             req.session.user = user;
+            res.redirect("/api/users/index");
             cb();
           } else {
             res.send("Incorrect Password");
@@ -115,9 +116,45 @@ const assignTasks = async (req, res, cb) => {
   }
 };
 
+const regiserVehicles = async (req, res, cb) => {
+  const vin = req.body.vehicleIdenticficationNumber;
+  const permitExpiry = req.body.permitExpiry;
+  // const companyId = await getLoggedInUserCompanyId(req);
+  const companyId = 1;
+  try {
+    const result = await db.query(
+      "INSERT INTO vehicles (v_vin,v_perexp,c_id) VALUES ($1,$2,$3)",
+      [vin, permitExpiry, companyId]
+    );
+    if (result.rowCount > 0) {
+      res.status(200).send("Vehicle was successfully Registered!!");
+    } else {
+      res.status(404).send("There was some error in registering the vehicle");
+    }
+  } catch (error) {
+    if (error) {
+      res.status(500).send("There was some issue on the Server Side");
+    }
+  }
+};
+
+const sendVehicels = async (req,res,cb) => {
+  try {
+    const companyId = await getLoggedInUserCompanyId(req);
+    const result = await db.query("SELECT * FROM vehicles WHERE c_id=$1",[companyId])
+    res.render("viewVehicles.ejs",{vehicles: result.rows});
+  } catch (error) {
+    console.error("Error renderinf viewVehicles:", error)
+    res.status(500).send("Internal Server Error! Sorry for in convinience")
+  }
+}
+
 const sendDrivers = async (req, res) => {
   try {
-    const result = await db.query("SELECT * FROM drivers WHERE c_id=1");
+    const companyId = await getLoggedInUserCompanyId(req);
+    const result = await db.query("SELECT * FROM drivers WHERE c_id=$1", [
+      companyId,
+    ]);
     res.render("viewDrivers.ejs", { users: result.rows });
   } catch (error) {
     console.error("Error rendering viewDrivers:", error);
@@ -133,4 +170,16 @@ const getLoggedInUserCompanyId = async (req) => {
   return loggedInUser.c_id;
 };
 
-export { register, login, assignTasks, sendDrivers };
+const logout = (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.log("Error destroying session:", err);
+      res.status(500).send("Internal Server Error");
+    } else {
+      console.log("User logged out successfully");
+      res.redirect("/api/users/login");
+    }
+  });
+};
+
+export { register, login, assignTasks, sendDrivers, regiserVehicles, sendVehicels, logout };

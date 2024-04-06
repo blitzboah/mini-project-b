@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Driver Registration</title>
+</head>
+<body>
+  <h1>Driver Registration Form</h1>
+  <form id="registrationForm" action="/api/users/registerVehicle" method="POST">
+    <label for="companyName">Company Name:</label>
+    <input type="text" id="vehicleIdenticficationNumber" name="vehicleIdenticficationNumber" required><br><br>
+
+    <label for="expiryDate">License Expiry Date:</label>
+    <input type="date" id="permitExpiry" name="permitExpiry" required><br><br>
+
+    <button type="submit">Register</button>
+  </form>
+</body>
+</html>
