@@ -2,11 +2,15 @@ import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEnvelope, faLock, faBuilding, faAngleDown, faAngleUp } from '@fortawesome/free-solid-svg-icons'; // Added faAngleUp icon
 import './bg.css'
+import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 
 function Navbar() {
   return (
     <nav className="flex justify-center items-center flex-wrap bg-gray-900 p-4">
-      <a className="text-yellow-300 underline-none mr-auto text-xl" href="#">BusInfo</a>
+      <Link to="/" className="text-yellow-300 underline-none mr-auto text-xl">BusInfo</Link>
+      <div className="flex justify-center items-center space-x-4">
+        <Link to="/" className="text-white hover:text-blue-400 underline-none">Home</Link>
+      </div>
     </nav>
   );
 }
@@ -31,7 +35,7 @@ function Log() {
         <div className="relative mb-4">
           <label className="text-left block text-gray-700 text-sm font-bold mb-2" htmlFor="userType">I am a:</label>
           <div className="relative">
-            <div className="flex items-center border-b border-b-2 border-blue-500 py-2">
+            <div className="flex items-center border-b border-blue-500 py-2">
               <span className="mr-2 text-blue-500 cursor-pointer" onClick={handleToggleSlide}>
                 {showSlide ? <FontAwesomeIcon icon={faAngleUp} /> : <FontAwesomeIcon icon={faAngleDown} />}
               </span>
@@ -52,17 +56,10 @@ function Log() {
         {userType === 'driver' ? (
           <div>
             <div className="mb-4">
-              <label className="text-left block text-gray-700 text-sm font-bold mb-2" htmlFor="email">E-mail</label>
-              <div className="flex items-center border-b border-b-2 border-blue-500 py-2">
+              <label className="text-left block text-gray-700 text-sm font-bold mb-2" htmlFor="email">Phone Number</label>
+              <div className="flex items-center border-b  border-blue-500 py-2">
                 <FontAwesomeIcon icon={faEnvelope} className="mr-2 text-blue-500" />
-                <input className="appearance-none bg-transparent border-none w-full text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none" id="email" type="email" placeholder="Enter your email" />
-              </div>
-            </div>
-            <div className="mb-6">
-              <label className="text-left block text-gray-700 text-sm font-bold mb-2" htmlFor="companyName">Company Name</label>
-              <div className="flex items-center border-b border-b-2 border-blue-500 py-2">
-                <FontAwesomeIcon icon={faBuilding} className="mr-2 text-blue-500" />
-                <input className="appearance-none bg-transparent border-none w-full text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none" id="companyName" type="text" placeholder="Enter your company name" />
+                <input className="appearance-none bg-transparent border-none w-full text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none" id="email" type="email" placeholder="Enter your phone number" />
               </div>
             </div>
           </div>
@@ -70,7 +67,7 @@ function Log() {
           <div>
             <div className="mb-4">
               <label className="text-left block text-gray-700 text-sm font-bold mb-2" htmlFor="email">E-mail</label>
-              <div className="flex items-center border-b border-b-2 border-blue-500 py-2">
+              <div className="flex items-center border-b  border-blue-500 py-2">
                 <FontAwesomeIcon icon={faEnvelope} className="mr-2 text-blue-500" />
                 <input className="appearance-none bg-transparent border-none w-full text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none" id="email" type="email" placeholder="Enter your email" />
               </div>
@@ -79,7 +76,7 @@ function Log() {
         )}
         <div className="mb-6">
           <label className="text-left block text-gray-700 text-sm font-bold mb-2" htmlFor="password">Password</label>
-          <div className="flex items-center border-b border-b-2 border-blue-500 py-2">
+          <div className="flex items-center border-b  border-blue-500 py-2">
             <FontAwesomeIcon icon={faLock} className="mr-2 text-blue-500" />
             <input className="appearance-none bg-transparent border-none w-full text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none" id="password" type="password" placeholder="Enter your password" />
           </div>
