@@ -14,8 +14,12 @@
     "@fortawesome/free-brands-svg-icons": "^6.5.2",
     "@fortawesome/free-solid-svg-icons": "^6.5.2",
     "@fortawesome/react-fontawesome": "^0.2.0",
+<<<<<<< HEAD
+    "nodemailer": "^6.9.13",
+=======
     "ejs": "^3.1.9",
     "express": "^4.19.2",
+>>>>>>> 65b87354e68004606a3f8912c9fe393ebb2df2ba
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.22.3"

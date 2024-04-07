@@ -5,6 +5,8 @@ import express from "express";
 import session from "express-session";
 import db from "./database/db.js";
 import bodyParser from "body-parser";
+import cron from "node-cron";
+import { resetDrivingHours, sendDriverStatus } from "./controller/driver.controller.js";
 
 db.connect();
 
@@ -20,6 +22,8 @@ app.use(
   })
 );
 
+cron.schedule('08 21 * * 0',sendDriverStatus);
+cron.schedule('56 1 * * 0', resetDrivingHours);
 app.use("/", defaultRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/drivers", driverRoutes);
