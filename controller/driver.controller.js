@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import db from "../database/db.js";
 import express from "express";
+import nodemailer from "nodemailer";
 
 const app = express();
 const saltRounds = 10;
@@ -180,6 +181,87 @@ const sendTrips = async (req, res) => {
   }
 };
 
+const resetDrivingHours = async () => {
+  try {
+    // const currentTime = new Date();
+    // const day = currentTime.getDay();
+    // const hour = currentTime.getHours();
+    // const minutes = currentTime.getMinutes();
+    // if (day === 1 && hour === 0 && minutes === 0) {
+    await db.query("UPDATE drivers SET driving_hrs = 0");
+    console.log("Driving hours reset to 0 for all drivers");
+    // }
+  } catch (error) {
+    console.error("Error resetting driving hours:", error);
+  }
+};
+
+const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
+  auth: {
+    user: process.env.EMAIL,
+    pass: process.env.PASSWORD,
+  },
+});
+
+const sendDriverStatus = async ( subject, text) => {
+  try {
+    const companyEmail = await cEmail(req);
+    const currentDate = new Date();
+    const expiryDate30Days = new Date();
+    const expiryDate15Days = new Date();
+    expiryDate30Days.setDate(currentDate.getDate() + 30);
+    expiryDate15Days.setDate(currentDate.getDate() + 15);
+
+    const drivers30Days = await db.query(
+      "SELECT * FROM drivers WHERE driver_licesp < $1 AND c_id = $2",
+      [expiryDate30Days, companyEmail.c_id]
+    );
+
+    const drivers15Days = await db.query(
+      "SELECT * FROM drivers WHERE driver_licesp < $1 AND c_id = $2",
+      [expiryDate15Days, companyEmail.c_id]
+    );
+
+    let emailText = `Dear ${companyEmail.company_name},\n\nThe following drivers' licenses are about to expire:\n\n`;
+
+    if (drivers30Days.rows.length > 0) {
+      emailText += `Expiring in 30 days:\n`;
+      drivers30Days.rows.forEach((driver) => {
+        emailText += `- ${driver.driver_name} (${driver.driver_licno})\n`;
+      });
+    }
+
+    if (drivers15Days.rows.length > 0) {
+      emailText += `\nExpiring in 15 days:\n`;
+      drivers15Days.rows.forEach((driver) => {
+        emailText += `- ${driver.driver_name} (${driver.driver_licno})\n`;
+      });
+    }
+
+    const emailOptions = {
+      from: process.env.EMAIL,
+      to: companyEmail.company_email,
+      subject: "Reminder About Driver's License expiry",
+      text: emailText,
+    };
+
+    await transporter.sendMail(emailOptions);
+    console.log("Email sent successfully");
+  } catch (error) {
+    console.error("Error sending email:", error);
+  }
+};
+
+const cEmail = async (req) => {
+  const loggedInUser = await getLoggedInUserCompanyId(req);
+  const cEmail = await db.query("SELECT company_email FROM company WHERE c_id = $1", [loggedInUser]);
+  return cEmail.rows[0];
+}
+
+
 const getLoggedInUserCompanyId = async (req) => {
   const loggedInUser = req.session.user;
   if (!loggedInUser) {
@@ -200,5 +282,11 @@ const logout = (req, res) => {
   });
 };
 
-
-export { register, login, tripsCompleted, sendTrips, logout };
+export {
+  register,
+  login,
+  tripsCompleted,
+  sendTrips,
+  resetDrivingHours,
+  logout,
+};
