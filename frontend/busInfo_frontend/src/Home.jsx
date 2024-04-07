@@ -4,19 +4,19 @@ import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheckCircle, faUsers, faHeart } from '@fortawesome/free-solid-svg-icons';
 import { faTwitter, faFacebook, faInstagram, faYoutube } from '@fortawesome/free-brands-svg-icons';
-import Login from './components/login';
+
 
 
 function Navbar() {
   return (
     <nav className="flex justify-center items-center flex-wrap bg-gray-900 p-4">
-      <a className="text-cyan-400 underline-none mr-auto text-xl" href="#">BusInfo</a>
+      <Link to="/" className="text-cyan-400 underline-none mr-auto text-xl">BusInfo</Link>
       <div className="flex justify-center items-center space-x-4">
-       <Link to="/login" className="text-white hover:text-blue-500 underline-none">Login</Link>
-        <a className="text-white hover:text-blue-500 underline-none" href="#">Signup</a>
+        <Link to="/company" className="text-white hover:text-blue-500 underline-none">Company</Link>
+        <Link to="/driver" className="text-white hover:text-blue-500 underline-none">Driver</Link>
       </div>
     </nav>
-  );
+  )
 }
 
 function Home() {
