@@ -197,70 +197,71 @@ const resetDrivingHours = async () => {
 };
 
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
+  host: 'smtp.ethereal.email',
   port: 587,
-  secure: false,
   auth: {
-    user: process.env.EMAIL,
-    pass: process.env.PASSWORD,
-  },
+      user: 'bud.franecki@ethereal.email',
+      pass: '9Z2PkCEBPMcTaJeqSe'
+  }
 });
 
-const sendDriverStatus = async ( subject, text) => {
+const getAllRegisteredCompanies = async (req) => {
+  const companies = await db.query("SELECT * FROM company");
+  return companies.rows;
+};
+
+const sendDriverStatus = async (req , res, next) => {
   try {
-    const companyEmail = await cEmail(req);
     const currentDate = new Date();
     const expiryDate30Days = new Date();
     const expiryDate15Days = new Date();
     expiryDate30Days.setDate(currentDate.getDate() + 30);
     expiryDate15Days.setDate(currentDate.getDate() + 15);
+    
+    const companyEmails = await getAllRegisteredCompanies(req);
+    console.log(companyEmails);
 
-    const drivers30Days = await db.query(
-      "SELECT * FROM drivers WHERE driver_licesp < $1 AND c_id = $2",
-      [expiryDate30Days, companyEmail.c_id]
-    );
+    for (const companyEmail of companyEmails) {
+      const drivers30Days = await db.query(
+        "SELECT * FROM drivers WHERE driver_licesp < $1 AND c_id = $2",
+        [expiryDate30Days, companyEmail.c_id]
+      );
 
-    const drivers15Days = await db.query(
-      "SELECT * FROM drivers WHERE driver_licesp < $1 AND c_id = $2",
-      [expiryDate15Days, companyEmail.c_id]
-    );
+      const drivers15Days = await db.query(
+        "SELECT * FROM drivers WHERE driver_licesp < $1 AND c_id = $2",
+        [expiryDate15Days, companyEmail.c_id]
+      );
 
-    let emailText = `Dear ${companyEmail.company_name},\n\nThe following drivers' licenses are about to expire:\n\n`;
+      let emailText = `Dear ${companyEmail.company_name},\n\nThe following drivers' licenses are about to expire:\n\n`;
 
-    if (drivers30Days.rows.length > 0) {
-      emailText += `Expiring in 30 days:\n`;
-      drivers30Days.rows.forEach((driver) => {
-        emailText += `- ${driver.driver_name} (${driver.driver_licno})\n`;
-      });
+      if (drivers30Days.rows.length > 0) {
+        emailText += `Expiring in 30 days:\n`;
+        drivers30Days.rows.forEach((driver) => {
+          emailText += `- ${driver.driver_name} (${driver.driver_licno})\n`;
+        });
+      }
+
+      if (drivers15Days.rows.length > 0) {
+        emailText += `\nExpiring in 15 days:\n`;
+        drivers15Days.rows.forEach((driver) => {
+          emailText += `- ${driver.driver_name} (${driver.driver_licno})\n`;
+        });
+      }
+
+      const emailOptions = {
+        from: process.env.EMAIL,
+        to: companyEmail.company_email,
+        subject: "Reminder About Driver's License expiry",
+        text: emailText,
+      };
+
+      await transporter.sendMail(emailOptions);
+      console.log(`Email sent to ${companyEmail.company_name} successfully`);
     }
-
-    if (drivers15Days.rows.length > 0) {
-      emailText += `\nExpiring in 15 days:\n`;
-      drivers15Days.rows.forEach((driver) => {
-        emailText += `- ${driver.driver_name} (${driver.driver_licno})\n`;
-      });
-    }
-
-    const emailOptions = {
-      from: process.env.EMAIL,
-      to: companyEmail.company_email,
-      subject: "Reminder About Driver's License expiry",
-      text: emailText,
-    };
-
-    await transporter.sendMail(emailOptions);
-    console.log("Email sent successfully");
   } catch (error) {
     console.error("Error sending email:", error);
   }
 };
-
-const cEmail = async (req) => {
-  const loggedInUser = await getLoggedInUserCompanyId(req);
-  const cEmail = await db.query("SELECT company_email FROM company WHERE c_id = $1", [loggedInUser]);
-  return cEmail.rows[0];
-}
-
 
 const getLoggedInUserCompanyId = async (req) => {
   const loggedInUser = req.session.user;
@@ -288,5 +289,6 @@ export {
   tripsCompleted,
   sendTrips,
   resetDrivingHours,
+  sendDriverStatus,
   logout,
 };
