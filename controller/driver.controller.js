@@ -16,6 +16,7 @@ const register = async (req, res, next) => {
   const address = req.body.driverAddress;
   const password = req.body.password;
   const licExp = req.body.expiryDate;
+  const licensePhoto = req.file;
 
   try {
     const checkResult = await db.query(
@@ -26,10 +27,12 @@ const register = async (req, res, next) => {
     if (checkResult.rows.length > 0) {
       res.send("Driver already registered.");
     } else {
+      console.log(cName);
       const companyIdQueryResult = await db.query(
         "SELECT * FROM company WHERE LOWER(company_name) LIKE LOWER($1)",
         [`%${cName}%`]
       );
+      console.log(companyIdQueryResult.rows[0]);
       const companyId = companyIdQueryResult.rows[0].c_id;
       console.log(companyId);
 
@@ -46,8 +49,8 @@ const register = async (req, res, next) => {
       });
 
       const result = await db.query(
-        "INSERT INTO drivers (driver_name, driver_phno, driver_licno, driver_address, driver_licesp, c_id, paswd) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
-        [name, phno, licno, address, licExp, companyId, hashedPassword]
+        "INSERT INTO drivers (driver_name, driver_phno, driver_licno, driver_address, driver_licesp, c_id, paswd, driver_photo) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *",
+        [name, phno, licno, address, licExp, companyId, hashedPassword, licensePhoto.path]
       );
 
       const driverRegisteredCheck = result.rows.length;
@@ -58,7 +61,7 @@ const register = async (req, res, next) => {
         console.log(`Driver was not able to register`);
       }
     }
-    next();
+    res.send(200).redirect("/api/drivers/index");
   } catch (err) {
     console.log(err);
   }
