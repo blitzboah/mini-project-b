@@ -2,6 +2,8 @@ import bcrypt from "bcrypt";
 import db from "../database/db.js";
 import express from "express";
 import nodemailer from "nodemailer";
+import env from "dotenv";
+env.config();
 
 const app = express();
 const saltRounds = 10;
@@ -200,8 +202,8 @@ const transporter = nodemailer.createTransport({
   host: 'smtp.ethereal.email',
   port: 587,
   auth: {
-      user: 'bud.franecki@ethereal.email',
-      pass: '9Z2PkCEBPMcTaJeqSe'
+      user: process.env.EMAIL,
+      pass: process.env.PASSWORD
   }
 });
 
