@@ -47,16 +47,7 @@ router.get("/index", isAuthenticated, (req, res) => {
   res.render("driverIndex.ejs");
 });
 router.post("/login", login);
-router.post(
-  "/register",
-  upload.single("licensePhoto"),
-  (req, res,next) => {
-    console.log(req.file);
-    res.send("Received file");
-    next();
-  },
-  register
-);
+router.post("/register", upload.single("licensePhoto"), register);
 router.post("/trips", tripsCompleted);
 router.get("/logout", logout);
 
