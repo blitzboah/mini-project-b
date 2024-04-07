@@ -70,10 +70,6 @@ function DriverForms() {
               <input type="text" className="text-left border border-gray-400 rounded px-3 py-2 w-full" name="driverPhone" value={formData.driverPhone} onChange={handleInputChange} required size="70" />
             </div>
             <div className="input-group">
-              <label htmlFor="driverPhoto" className="text-left block text-gray-700 text-sm font-bold mb-2">Driver Photo:</label>
-              <input type="file" className=" border border-gray-400 rounded px-3 py-2 w-full" id="driverPhoto" name="driverPhoto" accept=".jpg,.jpeg,.png" onChange={handleFileChange} required />
-            </div>
-            <div className="input-group">
               <label htmlFor="licenseNumber" className="text-left block text-gray-700 text-sm font-bold mb-2">License Number:</label>
               <input type="text" className=" border border-gray-400 rounded px-3 py-2 w-full" id="licenseNumber" name="licenseNumber" value={formData.licenseNumber} onChange={handleInputChange} required size="70" />
             </div>
