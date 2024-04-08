@@ -3,7 +3,7 @@ import db from "../database/db.js";
 import express from "express";
 import nodemailer from "nodemailer";
 import env from "dotenv";
-import jwt from "jsonwebtoken"
+import jwt from "jsonwebtoken";
 env.config();
 
 const app = express();
@@ -11,8 +11,8 @@ const saltRounds = 10;
 
 const generateToken = (user) => {
   const payload = {
-    id: user.driver_id,
-    email: user.driver_email,
+    id: user.d_id,
+    phoneNo: user.driver_phno,
   };
   const secret = process.env.JWT_SECRET;
   const options = {
@@ -31,7 +31,7 @@ const register = async (req, res, next) => {
   const licExp = req.body.expiryDate;
   const licensePhoto = req.file;
 
-  res.set('Content-Type', 'application/json');
+  res.set("Content-Type", "application/json");
 
   try {
     const checkResult = await db.query(
@@ -50,7 +50,9 @@ const register = async (req, res, next) => {
 
       if (companyIdQueryResult.rows.length === 0) {
         console.log(`Error getting company ID:`, err);
-        res.status(500).json({ message: "An error occurred while getting the company ID" });
+        res
+          .status(500)
+          .json({ message: "An error occurred while getting the company ID" });
       } else {
         const companyId = companyIdQueryResult.rows[0].c_id;
         console.log(companyId);
@@ -69,13 +71,24 @@ const register = async (req, res, next) => {
 
         const result = await db.query(
           "INSERT INTO drivers (driver_name, driver_phno, driver_licno, driver_address, driver_licesp, c_id, paswd, driver_photo) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *",
-          [name, phno, licno, address, licExp, companyId, hashedPassword, licensePhoto.path]
+          [
+            name,
+            phno,
+            licno,
+            address,
+            licExp,
+            companyId,
+            hashedPassword,
+            licensePhoto.path,
+          ]
         );
 
         const driverRegisteredCheck = result.rows.length;
         if (driverRegisteredCheck > 0) {
           console.log(`Driver is registered successfully.`);
-          res.status(201).json({ message: `Driver was registered Successfully` });
+          res
+            .status(201)
+            .json({ message: `Driver was registered Successfully` });
         } else {
           console.log(`Driver was not able to register`);
           res.status(500).json({ message: "Error registering driver" });
@@ -84,7 +97,9 @@ const register = async (req, res, next) => {
     }
   } catch (err) {
     console.log(err);
-    res.status(500).json({ message: "An error occurred while registering the driver" });
+    res
+      .status(500)
+      .json({ message: "An error occurred while registering the driver" });
   }
 };
 
@@ -98,25 +113,29 @@ const login = async (req, res, cb) => {
     );
     if (isDriverRegistered.rows.length === 0) {
       console.log(`Driver is not registered! please register yourself first`);
-      res.status(404).json({message: "The driver was not found!"})
+      res.status(404).json({ message: "The driver was not found!" });
     } else {
       const user = isDriverRegistered.rows[0];
       const storedPassword = user.paswd;
       bcrypt.compare(password, storedPassword, async (err, result) => {
         if (err) {
           console.log(` ERROR!! in hashing the password `);
-          res.status(500).json({message: "Error while comparing the hash passwords!"});
+          res
+            .status(500)
+            .json({ message: "Error while comparing the hash passwords!" });
         } else {
           if (result) {
             console.log(`Driver successfully logged in`);
             const token = generateToken(user);
             res.cookie("token", token, {
               httpOnly: true,
-              maxAge: 3600000, 
+              maxAge: 3600000,
             });
-            res.status(200).json({ message: `User was logged in Successfully` });
+            res
+              .status(200)
+              .json({ message: `User was logged in Successfully` });
           } else {
-            res.status(401).json({message: "Incorrect Password"})
+            res.status(401).json({ message: "Incorrect Password" });
           }
         }
       });
@@ -222,12 +241,12 @@ const resetDrivingHours = async () => {
 };
 
 const transporter = nodemailer.createTransport({
-  host: 'smtp.ethereal.email',
+  host: "smtp.ethereal.email",
   port: 587,
   auth: {
-      user: process.env.EMAIL,
-      pass: process.env.PASSWORD
-  }
+    user: process.env.EMAIL,
+    pass: process.env.PASSWORD,
+  },
 });
 
 const getAllRegisteredCompanies = async (req) => {
@@ -235,14 +254,14 @@ const getAllRegisteredCompanies = async (req) => {
   return companies.rows;
 };
 
-const sendDriverStatus = async (req , res, next) => {
+const sendDriverStatus = async (req, res, next) => {
   try {
     const currentDate = new Date();
     const expiryDate30Days = new Date();
     const expiryDate15Days = new Date();
     expiryDate30Days.setDate(currentDate.getDate() + 30);
     expiryDate15Days.setDate(currentDate.getDate() + 15);
-    
+
     const companyEmails = await getAllRegisteredCompanies(req);
     console.log(companyEmails);
 
@@ -289,16 +308,17 @@ const sendDriverStatus = async (req , res, next) => {
 };
 
 const getLoggedInUserCompanyId = async (req) => {
-  const loggedInUser = req.session.user;
-  if (!loggedInUser) {
+  const token = req.cookies.token;
+  if (!token) {
     throw new Error("User not authenticated");
   }
-  return loggedInUser.d_id;
+  const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+  return decodedToken.id;
 };
 
 const logout = (req, res) => {
   res.clearCookie("token");
-  res.status(200).json({message: "Successfully logged out"})
+  res.status(200).json({ message: "Successfully logged out" });
 };
 
 export {
