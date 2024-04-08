@@ -7,14 +7,16 @@ import db from "./database/db.js";
 import bodyParser from "body-parser";
 import cron from "node-cron";
 import { resetDrivingHours, sendDriverStatus } from "./controller/driver.controller.js";
+import cookieParser from "cookie-parser";
 
 db.connect();
 
 const port = 3000;
 const app = express();
 
-app.use(express.json()); // for parsing application/json
-app.use(express.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 app.use(
   session({
     secret: "your-secret-key",
