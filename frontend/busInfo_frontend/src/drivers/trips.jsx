@@ -1,34 +1,20 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
+
+function Navbar() {
+  return (
+    <nav className="flex justify-center items-center flex-wrap bg-gray-900 p-4">
+      <Link to="/" className="text-cyan-400 underline-none mr-auto text-xl">BusInfo</Link>
+      <div className="flex justify-center items-center space-x-4">
+        <Link to="/company" className="text-white hover:text-blue-500 underline-none">Company</Link>
+        <Link to="/driver" className="text-white hover:text-blue-500 underline-none">Driver</Link>
+      </div>
+    </nav>
+  )
+}
 
 function TripsPage(/*{ trips }*/) {
   return (
-    <>
-      <nav className="navbar navbar-expand-lg navbar-dark bg-dark" style={{ padding: '50px' }}>
-        <a className="navbar-brand" href="#" style={{ paddingLeft: '50px' }}>BusInfo</a>
-        <button
-          className="navbar-toggler"
-          type="button"
-          data-toggle="collapse"
-          data-target="#navbarNav"
-          aria-controls="navbarNav"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span className="navbar-toggler-icon"></span>
-        </button>
-        <div className="collapse navbar-collapse n justify-content-end" id="navbarNav">
-          <ul className="navbar-nav ms-auto">
-            <li className="nav-item active">
-              <a className="nav-link" href="/api/drivers/index">Home</a>
-            </li>
-            <li className="nav-item">
-              <a className="nav-link" href="logout">Logout</a>
-            </li>
-          </ul>
-        </div>
-      </nav>
-      <br />
-      <br />
       <table border="1">
         <thead>
           <tr>
@@ -45,11 +31,16 @@ function TripsPage(/*{ trips }*/) {
           ))} */}
         </tbody>
       </table>
-      <footer className="bg-gray-500 py-4">
-        <p style={{ color: '#fff' }}>© Copyright BusInfo</p>
-      </footer>
+  );
+}
+
+function DriversTrip(){
+  return(
+    <>
+    <Navbar/>
+    <TripsPage/>
     </>
   );
 }
 
-export default TripsPage;
+export default DriversTrip;
