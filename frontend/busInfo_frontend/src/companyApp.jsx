@@ -12,7 +12,7 @@ function CompanyApp() {
   return (
     <Router>
       <Routes>
-        <Route path="/companyPage" element={<CompanyPage />} />
+        <Route path="/" element={<CompanyPage />} />
         <Route path="/vehicleRegPage" element={<VehiclePage />} />
         <Route path="/vehicleViewPage" element={<ViewVehicle />} />
         <Route path="/viewDriverPage" element={<ViewDriversPage />} />

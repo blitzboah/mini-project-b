@@ -9,7 +9,7 @@ function Navbar() {
     <nav className="flex justify-center items-center flex-wrap bg-gray-900 p-4">
       <Link to="/" className="text-cyan-400 underline-none mr-auto text-xl">BusInfo</Link>
       <div className="flex justify-center items-center space-x-4">
-        <Link to="/viewTrips" className="text-white hover:text-blue-500 underline-none">Trips</Link>
+        <Link to="/driversTrips" className="text-white hover:text-blue-500 underline-none">Trips</Link>
         <Link to="/" className="text-white hover:text-blue-500 underline-none">Logout</Link>
       </div>
     </nav>
@@ -85,7 +85,6 @@ function Footer() {
 
 export default function DriverPage() {
   return (
-    <Router> {/* Wrap your entire application with Router */}
       <>
         <Navbar />
         <Home />
@@ -93,6 +92,5 @@ export default function DriverPage() {
         <CTA />
         <Footer />
       </>
-    </Router>
   );
 }
