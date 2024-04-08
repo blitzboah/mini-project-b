@@ -10,6 +10,7 @@ import {
 } from "../controller/driver.controller.js";
 import multer from "multer";
 import crypto from "crypto";
+import jwt from "jsonwebtoken";
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -28,11 +29,24 @@ const upload = multer({ storage });
 const router = Router();
 
 router.use(express.urlencoded({ extended: true }));
+
 const isAuthenticated = (req, res, next) => {
-  if (req.session.user) {
-    next();
+  const token = req.cookies.token;
+  console.log("Token:", token);
+  if (token) {
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+      if (err) {
+        console.log(`Error verifying token: ${err}`);
+        res.status(401).json({ message: "Unauthorized" });
+      } else {
+        console.log("Decoded token:", decoded);
+        req.user = decoded.user;
+        next();
+      }
+    });
   } else {
-    res.redirect("/api/drivers/login");
+    console.log("No token found");
+    res.status(401).json({ message: "Unauthorized" });
   }
 };
 

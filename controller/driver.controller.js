@@ -3,10 +3,23 @@ import db from "../database/db.js";
 import express from "express";
 import nodemailer from "nodemailer";
 import env from "dotenv";
+import jwt from "jsonwebtoken"
 env.config();
 
 const app = express();
 const saltRounds = 10;
+
+const generateToken = (user) => {
+  const payload = {
+    id: user.driver_id,
+    email: user.driver_email,
+  };
+  const secret = process.env.JWT_SECRET;
+  const options = {
+    expiresIn: "1h",
+  };
+  return jwt.sign(payload, secret, options);
+};
 
 const register = async (req, res, next) => {
   const cName = req.body.companyName;
@@ -17,6 +30,8 @@ const register = async (req, res, next) => {
   const password = req.body.password;
   const licExp = req.body.expiryDate;
   const licensePhoto = req.file;
+
+  res.set('Content-Type', 'application/json');
 
   try {
     const checkResult = await db.query(
@@ -32,38 +47,44 @@ const register = async (req, res, next) => {
         "SELECT * FROM company WHERE LOWER(company_name) LIKE LOWER($1)",
         [`%${cName}%`]
       );
-      console.log(companyIdQueryResult.rows[0]);
-      const companyId = companyIdQueryResult.rows[0].c_id;
-      console.log(companyId);
 
-      const hashedPassword = await new Promise((resolve, reject) => {
-        bcrypt.hash(password, saltRounds, (err, pass) => {
-          if (err) {
-            console.error("Error hashing password:", err);
-            reject(err);
-          } else {
-            console.log("Hashed Password:", pass);
-            resolve(pass);
-          }
-        });
-      });
-
-      const result = await db.query(
-        "INSERT INTO drivers (driver_name, driver_phno, driver_licno, driver_address, driver_licesp, c_id, paswd, driver_photo) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *",
-        [name, phno, licno, address, licExp, companyId, hashedPassword, licensePhoto.path]
-      );
-
-      const driverRegisteredCheck = result.rows.length;
-      if (driverRegisteredCheck > 0) {
-        console.log(`Driver is registered successfully.`);
-        res.status(200).send(`Driver was registered Successfully`);
+      if (companyIdQueryResult.rows.length === 0) {
+        console.log(`Error getting company ID:`, err);
+        res.status(500).json({ message: "An error occurred while getting the company ID" });
       } else {
-        console.log(`Driver was not able to register`);
+        const companyId = companyIdQueryResult.rows[0].c_id;
+        console.log(companyId);
+
+        const hashedPassword = await new Promise((resolve, reject) => {
+          bcrypt.hash(password, saltRounds, (err, pass) => {
+            if (err) {
+              console.error("Error hashing password:", err);
+              reject(err);
+            } else {
+              console.log("Hashed Password:", pass);
+              resolve(pass);
+            }
+          });
+        });
+
+        const result = await db.query(
+          "INSERT INTO drivers (driver_name, driver_phno, driver_licno, driver_address, driver_licesp, c_id, paswd, driver_photo) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *",
+          [name, phno, licno, address, licExp, companyId, hashedPassword, licensePhoto.path]
+        );
+
+        const driverRegisteredCheck = result.rows.length;
+        if (driverRegisteredCheck > 0) {
+          console.log(`Driver is registered successfully.`);
+          res.status(201).json({ message: `Driver was registered Successfully` });
+        } else {
+          console.log(`Driver was not able to register`);
+          res.status(500).json({ message: "Error registering driver" });
+        }
       }
     }
-    res.send(200).redirect("/api/drivers/index");
   } catch (err) {
     console.log(err);
+    res.status(500).json({ message: "An error occurred while registering the driver" });
   }
 };
 
@@ -77,20 +98,25 @@ const login = async (req, res, cb) => {
     );
     if (isDriverRegistered.rows.length === 0) {
       console.log(`Driver is not registered! please register yourself first`);
+      res.status(404).json({message: "The driver was not found!"})
     } else {
       const user = isDriverRegistered.rows[0];
       const storedPassword = user.paswd;
       bcrypt.compare(password, storedPassword, async (err, result) => {
         if (err) {
           console.log(` ERROR!! in hashing the password `);
+          res.status(500).json({message: "Error while comparing the hash passwords!"});
         } else {
           if (result) {
             console.log(`Driver successfully logged in`);
-            req.session.user = user;
-            cb();
-            res.redirect("/api/drivers/index");
+            const token = generateToken(user);
+            res.cookie("token", token, {
+              httpOnly: true,
+              maxAge: 3600000, 
+            });
+            res.status(200).json({ message: `User was logged in Successfully` });
           } else {
-            res.send("Incorrect Password");
+            res.status(401).json({message: "Incorrect Password"})
           }
         }
       });
@@ -188,14 +214,8 @@ const sendTrips = async (req, res) => {
 
 const resetDrivingHours = async () => {
   try {
-    // const currentTime = new Date();
-    // const day = currentTime.getDay();
-    // const hour = currentTime.getHours();
-    // const minutes = currentTime.getMinutes();
-    // if (day === 1 && hour === 0 && minutes === 0) {
     await db.query("UPDATE drivers SET driving_hrs = 0");
     console.log("Driving hours reset to 0 for all drivers");
-    // }
   } catch (error) {
     console.error("Error resetting driving hours:", error);
   }
@@ -277,15 +297,8 @@ const getLoggedInUserCompanyId = async (req) => {
 };
 
 const logout = (req, res) => {
-  req.session.destroy((err) => {
-    if (err) {
-      console.log("Error destroying session:", err);
-      res.status(500).send("Internal Server Error");
-    } else {
-      console.log("User logged out successfully");
-      res.redirect("/api/drivers/login");
-    }
-  });
+  res.clearCookie("token");
+  res.status(200).json({message: "Successfully logged out"})
 };
 
 export {

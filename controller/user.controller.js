@@ -1,9 +1,22 @@
 import bcrypt from "bcrypt";
 import db from "../database/db.js";
 import express from "express";
+import jwt from "jsonwebtoken";
 
 const app = express();
 const saltRounds = 10;
+
+const generateToken = (user) => {
+  const payload = {
+    id: user.id,
+    email: user.email,
+  };
+  const secret = process.env.JWT_SECRET;
+  const options = {
+    expiresIn: "1h",
+  };
+  return jwt.sign(payload, secret, options);
+};
 
 const register = async (req, res, next) => {
   const name = req.body.companyName;
@@ -12,6 +25,8 @@ const register = async (req, res, next) => {
   const email = req.body.email;
   const password = req.body.password;
 
+  res.set('Content-Type', 'application/json');
+
   try {
     const checkResult = await db.query(
       "SELECT * FROM company WHERE company_email = $1 OR company_name =$2",
@@ -19,11 +34,12 @@ const register = async (req, res, next) => {
     );
 
     if (checkResult.rows.length > 0) {
-      res.send("Email already exists. Try logging in.");
+      res.status(409).json({ message: "Email already exists. Try logging in." });
     } else {
       bcrypt.hash(password, saltRounds, async (err, pass) => {
         if (err) {
           console.error("Error hashing password:", err);
+          res.status(500).json({ message: "An error occurred while hashing the password" });
         } else {
           console.log("Hashed Password:", pass);
           const result = await db.query(
@@ -33,15 +49,17 @@ const register = async (req, res, next) => {
           const userRegisteredCheck = result.rows.length;
           if (userRegisteredCheck > 0) {
             console.log(`User is registered successfully.`);
+            res.status(201).json({ message: `User was registered Successfully` });
           } else {
             console.log(`User was not able to register`);
+            res.status(500).json({ message: "Error registering user" });
           }
         }
       });
-      next();
     }
   } catch (err) {
     console.log(err);
+    res.status(500).json({ message: "An error occurred while registering the user" });
   }
 };
 
