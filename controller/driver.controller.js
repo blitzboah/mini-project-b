@@ -308,7 +308,7 @@ const sendDriverStatus = async (req, res, next) => {
   }
 };
 
-const updateDrivers = async (req, res) => {
+const updateDriversLicExp = async (req, res) => {
   const licExp = req.body.driver_licesp;
   try {
     const driverId = await getLoggedInUserCompanyId(req);
@@ -316,6 +316,7 @@ const updateDrivers = async (req, res) => {
       "UPDATE drivers SET driver_licesp=$1 WHERE d_id=$2",
       [licExp, driverId]
     );
+    res.send(200).json({message:"Driver's Details Successfully Updated!"})
   } catch (error) {}
 };
 
@@ -340,5 +341,6 @@ export {
   sendTrips,
   resetDrivingHours,
   sendDriverStatus,
+  updateDriversLicExp,
   logout,
 };

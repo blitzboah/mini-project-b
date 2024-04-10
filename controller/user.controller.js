@@ -9,7 +9,7 @@ const saltRounds = 10;
 const generateToken = (user) => {
   const payload = {
     id: user.c_id,
-    email: user.comany_email,
+    email: user.company_email,
   };
   const secret = process.env.JWT_SECRET;
   const options = {
@@ -116,6 +116,9 @@ const login = async (req, res, cb) => {
 const assignTasks = async (req, res, cb) => {
   const tripDate = req.body.date;
   const tripDuration = req.body.duration;
+  if (!date ||!duration) {
+    return res.status(400).json({ message: "Date and duration are required." });
+  }
   try {
     const companyId = await getLoggedInUserCompanyId(req);
     const tripDetails = await db.query(
@@ -145,17 +148,19 @@ const assignTasks = async (req, res, cb) => {
         [driver.d_id, tripDetails.trip_id]
       );
     } while (!assignedTrip);
-    cb();
+    res.status(200).json({ message: "Tasks assigned successfully." });
   } catch (error) {
     console.log(error);
+    res
+      .status(500)
+      .json({ message: "An error occurred while assigning tasks." });
   }
 };
 
 const regiserVehicles = async (req, res, cb) => {
   const vin = req.body.vehicleIdenticficationNumber;
   const permitExpiry = req.body.permitExpiry;
-  // const companyId = await getLoggedInUserCompanyId(req);
-  const companyId = 1;
+  const companyId = await getLoggedInUserCompanyId(req);
   try {
     const result = await db.query(
       "INSERT INTO vehicles (v_vin,v_perexp,c_id) VALUES ($1,$2,$3)",
@@ -179,7 +184,7 @@ const sendVehicels = async (req, res, cb) => {
     const result = await db.query("SELECT * FROM vehicles WHERE c_id=$1", [
       companyId,
     ]);
-    res.render("viewVehicles.ejs", { vehicles: result.rows });
+    res.send(200).json(result);
   } catch (error) {
     console.error("Error renderinf viewVehicles:", error);
     res.status(500).send("Internal Server Error! Sorry for in convinience");
@@ -192,7 +197,7 @@ const sendDrivers = async (req, res) => {
     const result = await db.query("SELECT * FROM drivers WHERE c_id=$1", [
       companyId,
     ]);
-    res.render("viewDrivers.ejs", { users: result.rows });
+    res.send(200).json(result)
   } catch (error) {
     console.error("Error rendering viewDrivers:", error);
     res.status(500).send("Internal Server Error");
@@ -200,23 +205,17 @@ const sendDrivers = async (req, res) => {
 };
 
 const getLoggedInUserCompanyId = async (req) => {
-  const loggedInUser = req.session.user;
-  if (!loggedInUser) {
+  const token = req.cookies.token;
+  if (!token) {
     throw new Error("User not authenticated");
   }
-  return loggedInUser.c_id;
+  const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+  return decodedToken.id;
 };
 
 const logout = (req, res) => {
-  req.session.destroy((err) => {
-    if (err) {
-      console.log("Error destroying session:", err);
-      res.status(500).send("Internal Server Error");
-    } else {
-      console.log("User logged out successfully");
-      res.redirect("/api/users/login");
-    }
-  });
+  res.clearCookie("token");
+  res.status(200).json({ message: "Successfully logged out" });
 };
 
 export {

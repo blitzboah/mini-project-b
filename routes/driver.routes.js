@@ -7,6 +7,7 @@ import {
   register,
   sendTrips,
   tripsCompleted,
+  updateDriversLicExp,
 } from "../controller/driver.controller.js";
 import multer from "multer";
 import crypto from "crypto";
@@ -51,19 +52,11 @@ const isAuthenticated = (req, res, next) => {
 };
 
 router.get("/trips", isAuthenticated, sendTrips);
-router.get("/login", (req, res) => {
-  res.render("driverLogin.ejs");
-});
-router.get("/register", (req, res) => {
-  res.render("driverReg.ejs");
-});
-router.get("/index", isAuthenticated, (req, res) => {
-  res.render("driverIndex.ejs");
-});
 router.post("/login", login);
 router.post("/register", upload.single("licensePhoto"), register);
-router.post("/trips", tripsCompleted);
-router.get("/logout", logout);
+router.post("/trips",isAuthenticated, tripsCompleted);
+router.patch("/updateDriverLicExp",isAuthenticated,updateDriversLicExp);
+router.get("/logout",isAuthenticated ,logout);
 
 db.connect();
 
