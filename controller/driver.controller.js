@@ -142,6 +142,7 @@ const login = async (req, res, cb) => {
     }
   } catch (error) {
     console.log(error);
+    res.send(500).json({message:"Server Side Error!!"});
   }
 };
 
@@ -224,7 +225,7 @@ const sendTrips = async (req, res) => {
         tripsDetails.push(tripDetails.rows[0]);
       }
     }
-    res.render("viewTrips.ejs", { trips: tripsDetails });
+    res.status(200).json(tripsDetails)
   } catch (error) {
     console.error("Error rendering viewDrivers:", error);
     res.status(500).send("Internal Server Error");
@@ -305,6 +306,17 @@ const sendDriverStatus = async (req, res, next) => {
   } catch (error) {
     console.error("Error sending email:", error);
   }
+};
+
+const updateDrivers = async (req, res) => {
+  const licExp = req.body.driver_licesp;
+  try {
+    const driverId = await getLoggedInUserCompanyId(req);
+    const updateLicenseExpiry = await db.query(
+      "UPDATE drivers SET driver_licesp=$1 WHERE d_id=$2",
+      [licExp, driverId]
+    );
+  } catch (error) {}
 };
 
 const getLoggedInUserCompanyId = async (req) => {
