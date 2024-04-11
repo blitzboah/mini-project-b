@@ -30,7 +30,7 @@ function LoginDriver() {
   const [phoneNo, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleEmailChange = (e) => {
+  const handlePhoneChange = (e) => {
     setPhoneNumber(e.target.value);
   };
 
@@ -38,9 +38,9 @@ function LoginDriver() {
     setPassword(e.target.value);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!phoneNo ||!password) {
+    if (!phoneNo || !password) {
       alert("Phone number and password are required.");
       return;
     }
@@ -48,20 +48,22 @@ function LoginDriver() {
       phoneNo,
       password,
     };
-    axios
-     .post("http://localhost:3000/api/drivers/login", formData)
-     .then((res) => {
-        localStorage.setItem('token', res.data.token);
-  
-        console.log(res);
-        window.location.href = '/driverPage';
-      })
-     .catch((error) => {
-        console.error(error);
-        alert(
-          "An error occurred while logging in the driver. Please try again later."
-        );
-      });
+    try {
+      const res = await axios.post(
+        "http://localhost:3000/api/drivers/login",
+        formData
+      );
+      console.log(res);
+      localStorage.setItem("token", res.data.token);
+      const token = localStorage.getItem("token");
+      console.log(token);
+      window.location.href = '/driverPage';
+    } catch (error) {
+      console.error(error);
+      alert(
+        "An error occurred while logging in the driver. Please try again later."
+      );
+    }
   };
 
   return (
@@ -85,7 +87,7 @@ function LoginDriver() {
               type="text"
               placeholder="Enter your phone number"
               value={phoneNo}
-              onChange={handleEmailChange}
+              onChange={handlePhoneChange}
             />
           </div>
         </div>
