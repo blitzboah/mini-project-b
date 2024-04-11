@@ -73,9 +73,9 @@ function LoginOwner() {
           >
             Login
           </button>
-          <a className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800" href="#">
+          <Link to="/companyPage" className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800">
             Forgot Password?
-          </a>
+          </Link>
         </div>
         <div className="mt-4 text-center text-gray-600">
           Don't have an account? <Link to="/companyReg" className="text-blue-500 hover:underline">Sign up here</Link>
