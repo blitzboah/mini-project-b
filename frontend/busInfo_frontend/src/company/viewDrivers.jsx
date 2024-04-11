@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Link } from 'react-router-dom';
 
 
@@ -7,7 +8,7 @@ function Navbar() {
       <nav className="flex justify-center items-center flex-wrap bg-gray-900 p-4">
         <Link to="/" className="text-cyan-400 underline-none mr-auto text-xl">BusInfo</Link>
         <div className="flex justify-center items-center space-x-4">
-          <Link to="/" className="text-white hover:text-blue-500 underline-none">Home</Link>
+          <Link to="/companyPage" className="text-white hover:text-blue-500 underline-none">Home</Link>
           <Link to="/" className="text-white hover:text-blue-500 underline-none">Logout</Link>
         </div>
       </nav>
@@ -16,10 +17,6 @@ function Navbar() {
 
 function UsersTable() {
 
-    const users = [
-        { driver_name: 'John Doe', driver_licno: '12345', driver_phno: '1234567890' },
-        { driver_name: 'Jane Smith', driver_licno: '67890', driver_phno: '9876543210' }
-      ];
     return (
       <div className="bg-gray-800 p-8">
         <div className='bg-white p-4 rounded-md shadow-md'>
@@ -32,13 +29,18 @@ function UsersTable() {
             </tr>
           </thead>
           <tbody className="text-gray-600 text-sm font-light">
-            {users.map((user, index) => (
+            {/* {users.map((user, index) => (
           <tr key={index}>
             <td className="border px-4 py-2">{user.driver_name || ' '}</td>
             <td className="border px-4 py-2">{user.driver_licno || ' '}</td>
             <td className="border px-4 py-2">{user.driver_phno || ' '}</td>
           </tr>
-        ))}
+        ))} */}
+        <tr>
+          <td className="border px-4 py-2">NIggaMan</td>
+          <td className="border px-4 py-2">69420911</td>
+          <td className="border px-4 py-2">13234568</td>
+        </tr>
           </tbody>
         </table>
         </div>
