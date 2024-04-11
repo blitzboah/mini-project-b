@@ -6,6 +6,7 @@ import env from "dotenv";
 import jwt from "jsonwebtoken";
 env.config();
 
+
 const app = express();
 const saltRounds = 10;
 
@@ -106,6 +107,7 @@ const register = async (req, res, next) => {
 const login = async (req, res, cb) => {
   const phno = req.body.phoneNo;
   const password = req.body.password;
+  console.log(req.body);
   try {
     const isDriverRegistered = await db.query(
       "SELECT * FROM drivers WHERE driver_phno= $1",
@@ -127,10 +129,13 @@ const login = async (req, res, cb) => {
           if (result) {
             console.log(`Driver successfully logged in`);
             const token = generateToken(user);
-            res.cookie("token", token, {
+            res.cookie('token', token, {
               httpOnly: true,
               maxAge: 3600000,
+              secure: true
             });
+            console.log(token);
+            console.log();
             res
               .status(200)
               .json({ message: `User was logged in Successfully` });
@@ -142,7 +147,7 @@ const login = async (req, res, cb) => {
     }
   } catch (error) {
     console.log(error);
-    res.send(500).json({message:"Server Side Error!!"});
+    res.send(500).json({ message: "Server Side Error!!" });
   }
 };
 
@@ -225,7 +230,7 @@ const sendTrips = async (req, res) => {
         tripsDetails.push(tripDetails.rows[0]);
       }
     }
-    res.status(200).json(tripsDetails)
+    res.status(200).json(tripsDetails);
   } catch (error) {
     console.error("Error rendering viewDrivers:", error);
     res.status(500).send("Internal Server Error");
@@ -316,7 +321,7 @@ const updateDriversLicExp = async (req, res) => {
       "UPDATE drivers SET driver_licesp=$1 WHERE d_id=$2",
       [licExp, driverId]
     );
-    res.send(200).json({message:"Driver's Details Successfully Updated!"})
+    res.send(200).json({ message: "Driver's Details Successfully Updated!" });
   } catch (error) {}
 };
 
@@ -330,8 +335,15 @@ const getLoggedInUserCompanyId = async (req) => {
 };
 
 const logout = (req, res) => {
-  res.clearCookie("token");
-  res.status(200).json({ message: "Successfully logged out" });
+  try {
+    res.clearCookie("user");
+    req.session.destroy();
+    util.response.ok(res, "Successfully logged out.");
+    // res.cookie('token',null,{maxAge:0,httpOnly:true,secure:true})
+    // res.status(200).json({success: true});
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 export {
