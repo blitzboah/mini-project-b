@@ -3,14 +3,30 @@ import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheckCircle, faUsers, faHeart } from '@fortawesome/free-solid-svg-icons';
 import { faTwitter, faFacebook, faInstagram, faYoutube } from '@fortawesome/free-brands-svg-icons';
+import axios from 'axios';
 
 function Navbar() {
+  const handleLogout = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.get('http://localhost:3000/api/drivers/logout', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
+  };
+
   return (
     <nav className="flex justify-center items-center flex-wrap bg-gray-900 p-4">
       <Link to="/" className="text-cyan-400 underline-none mr-auto text-xl">BusInfo</Link>
       <div className="flex justify-center items-center space-x-4">
         <Link to="/viewTrips" className="text-white hover:text-blue-500 underline-none">Trips</Link>
-        <Link to="/" className="text-white hover:text-blue-500 underline-none">Logout</Link>
+        <button onClick={handleLogout} className="text-white hover:text-blue-500 underline-none">Logout</button>
       </div>
     </nav>
   );

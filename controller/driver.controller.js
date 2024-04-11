@@ -104,8 +104,9 @@ const register = async (req, res, next) => {
 };
 
 const login = async (req, res, cb) => {
-  const phno = req.body.phoneNo;
+  const phno = req.body.phoneNumber;
   const password = req.body.password;
+  console.log(req.body);
   try {
     const isDriverRegistered = await db.query(
       "SELECT * FROM drivers WHERE driver_phno= $1",
@@ -131,6 +132,7 @@ const login = async (req, res, cb) => {
               httpOnly: true,
               maxAge: 3600000,
             });
+            console.log(token);
             res
               .status(200)
               .json({ message: `User was logged in Successfully` });

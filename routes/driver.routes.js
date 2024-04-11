@@ -42,6 +42,7 @@ const isAuthenticated = (req, res, next) => {
       } else {
         console.log("Decoded token:", decoded);
         req.user = decoded.user;
+        res.send(200).json({ message: "The user is authenticated" });
         next();
       }
     });
@@ -51,12 +52,14 @@ const isAuthenticated = (req, res, next) => {
   }
 };
 
+router.get("/isAuthenticated", isAuthenticated);
+
 router.get("/trips", isAuthenticated, sendTrips);
 router.post("/login", login);
 router.post("/register", upload.single("licensePhoto"), register);
-router.post("/trips",isAuthenticated, tripsCompleted);
-router.patch("/updateDriverLicExp",isAuthenticated,updateDriversLicExp);
-router.get("/logout",isAuthenticated ,logout);
+router.post("/trips", isAuthenticated, tripsCompleted);
+router.patch("/updateDriverLicExp", isAuthenticated, updateDriversLicExp);
+router.get("/logout", isAuthenticated, logout);
 
 db.connect();
 

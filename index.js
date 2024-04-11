@@ -8,11 +8,14 @@ import bodyParser from "body-parser";
 import cron from "node-cron";
 import { resetDrivingHours, sendDriverStatus } from "./controller/driver.controller.js";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 
 db.connect();
 
 const port = 3000;
 const app = express();
+
+app.use(cors());
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
