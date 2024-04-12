@@ -4,11 +4,13 @@ import express from "express";
 import nodemailer from "nodemailer";
 import env from "dotenv";
 import jwt from "jsonwebtoken";
+import cookieParser from "cookie-parser";
 env.config();
-
 
 const app = express();
 const saltRounds = 10;
+
+app.use(cookieParser());
 
 const generateToken = (user) => {
   const payload = {
@@ -129,16 +131,16 @@ const login = async (req, res, cb) => {
           if (result) {
             console.log(`Driver successfully logged in`);
             const token = generateToken(user);
+            // Set the token as a cookie in the response
             res.cookie('token', token, {
               httpOnly: true,
-              maxAge: 3600000,
+              maxAge: 60*60*24*7,
               secure: true
             });
             console.log(token);
-            console.log();
             res
               .status(200)
-              .json({ message: `User was logged in Successfully` });
+              .json({ success: true, message: `User was logged in Successfully`, user,token });
           } else {
             res.status(401).json({ message: "Incorrect Password" });
           }
@@ -147,7 +149,7 @@ const login = async (req, res, cb) => {
     }
   } catch (error) {
     console.log(error);
-    res.send(500).json({ message: "Server Side Error!!" });
+    res.status(500).json({ message: "Server Side Error!!" });
   }
 };
 
@@ -230,7 +232,7 @@ const sendTrips = async (req, res) => {
         tripsDetails.push(tripDetails.rows[0]);
       }
     }
-    res.status(200).json(tripsDetails);
+    res.status(200).json({success:true,message:"Trips sent successfully",tripsDetails});
   } catch (error) {
     console.error("Error rendering viewDrivers:", error);
     res.status(500).send("Internal Server Error");
@@ -325,7 +327,8 @@ const updateDriversLicExp = async (req, res) => {
   } catch (error) {}
 };
 
-const getLoggedInUserCompanyId = async (req) => {
+
+const getLoggedInUserCompanyId = (req) => {
   const token = req.cookies.token;
   if (!token) {
     throw new Error("User not authenticated");
@@ -335,15 +338,8 @@ const getLoggedInUserCompanyId = async (req) => {
 };
 
 const logout = (req, res) => {
-  try {
-    res.clearCookie("user");
-    req.session.destroy();
-    util.response.ok(res, "Successfully logged out.");
-    // res.cookie('token',null,{maxAge:0,httpOnly:true,secure:true})
-    // res.status(200).json({success: true});
-  } catch (error) {
-    console.error(error);
-  }
+  res.clearCookie("token");
+  res.status(200).json({ message: "Successfully logged out" });
 };
 
 export {

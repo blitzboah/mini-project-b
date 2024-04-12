@@ -18,19 +18,19 @@ import axios from "axios";
 function Navbar() {
   const handleLogout = async () => {
     try {
-      const token = getCookie("token"); // Function to retrieve cookie value
+      const token = getCookie("token"); 
       if (!token) {
         console.error("Token not found in cookie.");
         return;
       }
-      await axios.get("http://localhost:3000/api/drivers/logout", {
+      await axios.post("http://localhost:3000/api/drivers/logout", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
       document.cookie =
-        "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"; // Remove token cookie
-      window.location.href = "/login";
+        "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"; 
+      window.location.href = "/driver";
     } catch (error) {
       console.error("Error logging out:", error);
     }
