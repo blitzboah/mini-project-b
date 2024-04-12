@@ -26,6 +26,7 @@ function Navbar() {
   );
 }
 
+
 function LoginDriver() {
   const [phoneNo, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
@@ -54,8 +55,8 @@ function LoginDriver() {
         formData
       );
       console.log(res);
-      localStorage.setItem("token", res.data.token);
-      const token = localStorage.getItem("token");
+      const token = res.data.token;
+      document.cookie = `token=${token}; max-age=360000; path=/`;
       console.log(token);
       window.location.href = '/driverPage';
     } catch (error) {
@@ -65,6 +66,7 @@ function LoginDriver() {
       );
     }
   };
+
 
   return (
     <div className="flex justify-center items-center h-screen bg-gray-800">

@@ -54,10 +54,10 @@ const isAuthenticated = (req, res, next) => {
 
 router.get("/isAuthenticated", isAuthenticated);
 
-router.get("/trips", isAuthenticated, sendTrips);
+router.get("/trips", sendTrips);
 router.post("/login", login);
 router.post("/register", upload.single("licensePhoto"), register);
-router.post("/trips", isAuthenticated, tripsCompleted);
+router.post("/trips", tripsCompleted);
 router.patch("/updateDriverLicExp", isAuthenticated, updateDriversLicExp);
 router.post("/logout", logout);
 
