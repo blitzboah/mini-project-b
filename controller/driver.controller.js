@@ -131,7 +131,6 @@ const login = async (req, res, cb) => {
           if (result) {
             console.log(`Driver successfully logged in`);
             const token = generateToken(user);
-            // Set the token as a cookie in the response
             res.cookie('token', token, {
               httpOnly: true,
               maxAge: 60*60*24*7,
