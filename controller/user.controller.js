@@ -55,7 +55,7 @@ const register = async (req, res, next) => {
             console.log(`User is registered successfully.`);
             res
               .status(201)
-              .json({ message: `User was registered Successfully` });
+              .json({success: true, message: `User was registered Successfully` });
           } else {
             console.log(`User was not able to register`);
             res.status(500).json({ message: "Error registering user" });
@@ -100,7 +100,7 @@ const login = async (req, res, cb) => {
             });
             res
               .status(200)
-              .json({ message: `User was logged in Successfully` });
+              .json({success: true, message: `User was logged in Successfully`, user, token });
           } else {
             res.status(401).json({ message: "Incorrect Password" });
           }

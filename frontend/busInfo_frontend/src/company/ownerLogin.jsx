@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEnvelope, faLock } from '@fortawesome/free-solid-svg-icons';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
+import axios from 'axios';
 import './bg.css';
 
 function Navbar() {
@@ -28,9 +29,32 @@ function LoginOwner() {
     setPassword(e.target.value);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Add your login logic here for the owner
+    if (!email || !password) {
+      alert("Email and password are required.");
+      return;
+    }
+    const formData = {
+      email,
+      password,
+    };
+    try {
+      const res = await axios.post(
+        "http://localhost:3000/api/users/login",
+        formData
+      );
+      console.log(res);
+      const token = res.data.token;
+      document.cookie = `token=${token}; max-age=360000; path=/`;
+      console.log(token);
+      window.location.href = '/companyPage';
+    } catch (error) {
+      console.error(error);
+      alert(
+        "An error occurred while logging in. Please try again later."
+      );
+    }
   };
 
   return (
