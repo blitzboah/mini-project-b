@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser } from '@fortawesome/free-solid-svg-icons/faUser';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
+import axios from 'axios';
 import './bg.css';
 
 function Navbar() {
@@ -40,8 +41,29 @@ function DriverForms() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Add your registration logic here
-    console.log(formData);
+    const formData = new FormData();
+    formData.append('companyName', formData.companyName);
+    formData.append('driverName', formData.driverName);
+    formData.append('phoneNumber', formData.phoneNumber);
+    formData.append('licenseNumber', formData.licenseNumber);
+    formData.append('driverAddress', formData.driverAddress);
+    formData.append('password', formData.password);
+    formData.append('expiryDate', formData.expiryDate);
+    formData.append('licensePhoto', formData.licensePhoto);
+  
+    axios.post('https://localhost:3000/api/drivers/register', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+    .then(response => {
+      console.log(response);
+      // Handle successful registration
+    })
+    .catch(error => {
+      console.log(error);
+      // Handle error
+    });
   };
 
   return (

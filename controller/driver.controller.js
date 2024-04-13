@@ -25,13 +25,7 @@ const generateToken = (user) => {
 };
 
 const register = async (req, res, next) => {
-  const cName = req.body.companyName;
-  const name = req.body.driverName;
-  const phno = req.body.phoneNo;
-  const licno = req.body.licenseNo;
-  const address = req.body.driverAddress;
-  const password = req.body.password;
-  const licExp = req.body.expiryDate;
+  const formData = req.body;
   const licensePhoto = req.file;
 
   res.set("Content-Type", "application/json");
@@ -39,16 +33,16 @@ const register = async (req, res, next) => {
   try {
     const checkResult = await db.query(
       "SELECT * FROM drivers WHERE driver_name = $1",
-      [name]
+      [formData.get("driverName")]
     );
 
     if (checkResult.rows.length > 0) {
       res.send("Driver already registered.");
     } else {
-      console.log(cName);
+      console.log(formData.get("companyName"));
       const companyIdQueryResult = await db.query(
         "SELECT * FROM company WHERE LOWER(company_name) LIKE LOWER($1)",
-        [`%${cName}%`]
+        [`%${formData.get("companyName")}%`]
       );
 
       if (companyIdQueryResult.rows.length === 0) {
@@ -61,7 +55,7 @@ const register = async (req, res, next) => {
         console.log(companyId);
 
         const hashedPassword = await new Promise((resolve, reject) => {
-          bcrypt.hash(password, saltRounds, (err, pass) => {
+          bcrypt.hash(formData.get("password"), saltRounds, (err, pass) => {
             if (err) {
               console.error("Error hashing password:", err);
               reject(err);
@@ -75,11 +69,11 @@ const register = async (req, res, next) => {
         const result = await db.query(
           "INSERT INTO drivers (driver_name, driver_phno, driver_licno, driver_address, driver_licesp, c_id, paswd, driver_photo) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *",
           [
-            name,
-            phno,
-            licno,
-            address,
-            licExp,
+            formData.get("driverName"),
+            formData.get("phoneNumber"),
+            formData.get("licenseNumber"),
+            formData.get("driverAddress"),
+            formData.get("expiryDate"),
             companyId,
             hashedPassword,
             licensePhoto.path,
