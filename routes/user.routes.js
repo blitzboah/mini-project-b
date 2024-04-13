@@ -27,6 +27,7 @@ const isAuthenticated = (req, res, next) => {
       } else {
         console.log("Decoded token:", decoded);
         req.user = decoded.user;
+        res.send(200).json({ message: "The user is authenticated" });
         next();
       }
     });
@@ -41,7 +42,7 @@ router.post("/register", register);
 router.post("/trips", isAuthenticated, assignTasks);
 router.post("/registerVehicle", isAuthenticated, regiserVehicles);
 router.get("/viewDrivers", isAuthenticated, sendDrivers);
-router.get("/logout", isAuthenticated, logout);
+router.post("/logout", logout);
 router.get("/viewVehicles", isAuthenticated, sendVehicels);
 
 db.connect();

@@ -25,76 +25,79 @@ const generateToken = (user) => {
 };
 
 const register = async (req, res, next) => {
-  const formData = req.body;
+  const cName = req.body.companyName;
+  const name = req.body.driverName;
+  const phno = req.body.phoneNumber;
+  const licno = req.body.licenseNumber;
+  const address = req.body.driverAddress;
+  const password = req.body.password;
+  const licExp = req.body.expiryDate;
   const licensePhoto = req.file;
 
   res.set("Content-Type", "application/json");
 
   try {
+    if (!licensePhoto) {
+      // If licensePhoto is undefined, return an error response
+      return res.status(400).json({ message: "License photo is required" });
+    }
+
     const checkResult = await db.query(
       "SELECT * FROM drivers WHERE driver_name = $1",
-      [formData.get("driverName")]
+      [name]
     );
 
     if (checkResult.rows.length > 0) {
-      res.send("Driver already registered.");
-    } else {
-      console.log(formData.get("companyName"));
-      const companyIdQueryResult = await db.query(
-        "SELECT * FROM company WHERE LOWER(company_name) LIKE LOWER($1)",
-        [`%${formData.get("companyName")}%`]
-      );
+      return res.send("Driver already registered.");
+    }
 
-      if (companyIdQueryResult.rows.length === 0) {
-        console.log(`Error getting company ID:`, err);
-        res
-          .status(500)
-          .json({ message: "An error occurred while getting the company ID" });
-      } else {
-        const companyId = companyIdQueryResult.rows[0].c_id;
-        console.log(companyId);
+    const companyIdQueryResult = await db.query(
+      "SELECT * FROM company WHERE LOWER(company_name) LIKE LOWER($1)",
+      [`%${cName}%`]
+    );
 
-        const hashedPassword = await new Promise((resolve, reject) => {
-          bcrypt.hash(formData.get("password"), saltRounds, (err, pass) => {
-            if (err) {
-              console.error("Error hashing password:", err);
-              reject(err);
-            } else {
-              console.log("Hashed Password:", pass);
-              resolve(pass);
-            }
-          });
-        });
+    if (companyIdQueryResult.rows.length === 0) {
+      return res.status(500).json({ message: "Error getting company ID" });
+    }
 
-        const result = await db.query(
-          "INSERT INTO drivers (driver_name, driver_phno, driver_licno, driver_address, driver_licesp, c_id, paswd, driver_photo) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *",
-          [
-            formData.get("driverName"),
-            formData.get("phoneNumber"),
-            formData.get("licenseNumber"),
-            formData.get("driverAddress"),
-            formData.get("expiryDate"),
-            companyId,
-            hashedPassword,
-            licensePhoto.path,
-          ]
-        );
+    const companyId = companyIdQueryResult.rows[0].c_id;
 
-        const driverRegisteredCheck = result.rows.length;
-        if (driverRegisteredCheck > 0) {
-          console.log(`Driver is registered successfully.`);
-          res
-            .status(201)
-            .json({ message: `Driver was registered Successfully` });
+    const hashedPassword = await new Promise((resolve, reject) => {
+      bcrypt.hash(password, saltRounds, (err, pass) => {
+        if (err) {
+          console.error("Error hashing password:", err);
+          reject(err);
         } else {
-          console.log(`Driver was not able to register`);
-          res.status(500).json({ message: "Error registering driver" });
+          console.log("Hashed Password:", pass);
+          resolve(pass);
         }
-      }
+      });
+    });
+
+    const result = await db.query(
+      "INSERT INTO drivers (driver_name, driver_phno, driver_licno, driver_address, driver_licesp, c_id, paswd, driver_photo) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *",
+      [
+        name,
+        phno,
+        licno,
+        address,
+        licExp,
+        companyId,
+        hashedPassword,
+        licensePhoto.path,
+      ]
+    );
+
+    if (result.rows.length > 0) {
+      return res
+        .status(201)
+        .json({ message: `Driver registered successfully` });
+    } else {
+      return res.status(500).json({ message: "Error registering driver" });
     }
   } catch (err) {
-    console.log(err);
-    res
+    console.error(err);
+    return res
       .status(500)
       .json({ message: "An error occurred while registering the driver" });
   }
@@ -125,15 +128,20 @@ const login = async (req, res, cb) => {
           if (result) {
             console.log(`Driver successfully logged in`);
             const token = generateToken(user);
-            res.cookie('token', token, {
+            res.cookie("token", token, {
               httpOnly: true,
-              maxAge: 60*60*24*7,
-              secure: true
+              maxAge: 60 * 60 * 24 * 7,
+              secure: true,
             });
             console.log(token);
             res
               .status(200)
-              .json({ success: true, message: `User was logged in Successfully`, user,token });
+              .json({
+                success: true,
+                message: `User was logged in Successfully`,
+                user,
+                token,
+              });
           } else {
             res.status(401).json({ message: "Incorrect Password" });
           }
@@ -225,7 +233,13 @@ const sendTrips = async (req, res) => {
         tripsDetails.push(tripDetails.rows[0]);
       }
     }
-    res.status(200).json({success:true,message:"Trips sent successfully",tripsDetails});
+    res
+      .status(200)
+      .json({
+        success: true,
+        message: "Trips sent successfully",
+        tripsDetails,
+      });
   } catch (error) {
     console.error("Error rendering viewDrivers:", error);
     res.status(500).send("Internal Server Error");
@@ -319,7 +333,6 @@ const updateDriversLicExp = async (req, res) => {
     res.send(200).json({ message: "Driver's Details Successfully Updated!" });
   } catch (error) {}
 };
-
 
 const getLoggedInUserCompanyId = (req) => {
   const token = req.cookies.token;
