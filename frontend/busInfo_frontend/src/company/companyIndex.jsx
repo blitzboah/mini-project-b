@@ -3,8 +3,35 @@ import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheckCircle, faUsers, faHeart } from '@fortawesome/free-solid-svg-icons';
 import { faTwitter, faFacebook, faInstagram, faYoutube } from '@fortawesome/free-brands-svg-icons';
+import axios from 'axios';
 
 function Navbar() {
+  const handleLogout = async () => {
+    try {
+      const token = getCookie("token"); 
+      if (!token) {
+        console.error("Token not found in cookie.");
+        return;
+      }
+      await axios.post("http://localhost:3000/api/users/logout", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      document.cookie =
+        "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"; 
+      window.location.href = "/company";
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
+  };
+
+  const getCookie = (name) => {
+    const cookieValue = document.cookie.match(
+      "(^|;)\\s*" + name + "\\s*=\\s*([^;]+)"
+    );
+    return cookieValue ? cookieValue.pop() : null;
+  };
   return (
     <nav className="flex justify-center items-center flex-wrap bg-gray-900 p-4">
       <Link to="/" className="text-cyan-400 underline-none mr-auto text-xl">BusInfo</Link>
@@ -13,7 +40,12 @@ function Navbar() {
         <Link to="/viewDriverPage" className="text-white hover:text-blue-500 underline-none">Drivers</Link>
         <Link to="/vehicleRegPage" className="text-white hover:text-blue-500 underline-none">Vehicles</Link>
         <Link to="/setTrips" className="text-white hover:text-blue-500 underline-none">Trips</Link>
-        <Link to="/" className="text-white hover:text-blue-500 underline-none">Logout</Link>
+        <button
+          onClick={handleLogout}
+          className="text-white hover:text-blue-500 underline-none"
+        >
+          Logout
+        </button>
       </div>
     </nav>
   );

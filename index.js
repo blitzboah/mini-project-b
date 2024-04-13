@@ -31,8 +31,8 @@ app.use(
   })
 );
 
-cron.schedule('08 21 * * 0',sendDriverStatus);
-cron.schedule('56 1 * * 0', resetDrivingHours);
+cron.schedule('42 1 * * 0',sendDriverStatus);
+cron.schedule('42 1 * * 0', resetDrivingHours);
 app.use("/", defaultRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/drivers", driverRoutes);
