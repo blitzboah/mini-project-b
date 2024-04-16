@@ -24,8 +24,7 @@ const register = async (req, res, next) => {
   const address = req.body.address;
   const email = req.body.email;
   const password = req.body.password;
-
-  res.set("Content-Type", "application/json");
+  console.log(req.body);
 
   try {
     const checkResult = await db.query(
@@ -53,9 +52,10 @@ const register = async (req, res, next) => {
           const userRegisteredCheck = result.rows.length;
           if (userRegisteredCheck > 0) {
             console.log(`User is registered successfully.`);
-            res
-              .status(201)
-              .json({success: true, message: `User was registered Successfully` });
+            res.status(201).json({
+              success: true,
+              message: `User was registered Successfully`,
+            });
           } else {
             console.log(`User was not able to register`);
             res.status(500).json({ message: "Error registering user" });
@@ -64,10 +64,8 @@ const register = async (req, res, next) => {
       });
     }
   } catch (err) {
-    console.log(err);
-    res
-      .status(500)
-      .json({ message: "An error occurred while registering the user" });
+    console.error("Error in register route:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
 
@@ -98,9 +96,12 @@ const login = async (req, res, cb) => {
               httpOnly: true,
               maxAge: 3600000,
             });
-            res
-              .status(200)
-              .json({success: true, message: `User was logged in Successfully`, user, token });
+            res.status(200).json({
+              success: true,
+              message: `User was logged in Successfully`,
+              user,
+              token,
+            });
           } else {
             res.status(401).json({ message: "Incorrect Password" });
           }
@@ -109,14 +110,14 @@ const login = async (req, res, cb) => {
     }
   } catch (error) {
     console.log(error);
-    res.send(500).json({ message: "Server Side Error!!" });
+    res.status(500).json({ message: "Server Side Error!!" });
   }
 };
 
 const assignTasks = async (req, res, cb) => {
   const tripDate = req.body.date;
   const tripDuration = req.body.duration;
-  if (!date ||!duration) {
+  if (!date || !duration) {
     return res.status(400).json({ message: "Date and duration are required." });
   }
   try {
@@ -158,8 +159,9 @@ const assignTasks = async (req, res, cb) => {
 };
 
 const regiserVehicles = async (req, res, cb) => {
-  const vin = req.body.vehicleIdenticficationNumber;
+  const vin = req.body.busNumber;
   const permitExpiry = req.body.permitExpiry;
+  console.log(req.body);
   const companyId = await getLoggedInUserCompanyId(req);
   try {
     const result = await db.query(
@@ -184,10 +186,12 @@ const sendVehicels = async (req, res, cb) => {
     const result = await db.query("SELECT * FROM vehicles WHERE c_id=$1", [
       companyId,
     ]);
-    res.send(200).json(result);
+    res.status(200).json(result);
   } catch (error) {
     console.error("Error renderinf viewVehicles:", error);
-    res.status(500).send("Internal Server Error! Sorry for in convinience");
+    res
+      .status(500)
+      .json({ messsage: "Internal Server Error! Sorry for in convinience" });
   }
 };
 
@@ -197,10 +201,15 @@ const sendDrivers = async (req, res) => {
     const result = await db.query("SELECT * FROM drivers WHERE c_id=$1", [
       companyId,
     ]);
-    res.send(200).json(result)
+    const drivers = result.rows;
+    res.status(200).json({
+      success: true,
+      message: "Drivers List Successfully sent",
+      drivers,
+    });
   } catch (error) {
     console.error("Error rendering viewDrivers:", error);
-    res.status(500).send("Internal Server Error");
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
 

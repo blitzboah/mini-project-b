@@ -1,6 +1,7 @@
 import db from "../database/db.js";
 import { Router } from "express";
 import express from "express";
+import bodyParser from "body-parser";
 import {
   assignTasks,
   login,
@@ -14,6 +15,7 @@ import jwt from "jsonwebtoken";
 
 const router = Router();
 
+router.use(express.json())
 router.use(express.urlencoded({ extended: true }));
 
 const isAuthenticated = (req, res, next) => {
@@ -27,7 +29,7 @@ const isAuthenticated = (req, res, next) => {
       } else {
         console.log("Decoded token:", decoded);
         req.user = decoded.user;
-        res.send(200).json({ message: "The user is authenticated" });
+        res.status(200).json({ message: "The user is authenticated" });
         next();
       }
     });
@@ -40,8 +42,8 @@ const isAuthenticated = (req, res, next) => {
 router.post("/login", login);
 router.post("/register", register);
 router.post("/trips", isAuthenticated, assignTasks);
-router.post("/registerVehicle", isAuthenticated, regiserVehicles);
-router.get("/viewDrivers", isAuthenticated, sendDrivers);
+router.post("/registerVehicle", regiserVehicles);
+router.get("/viewDrivers", sendDrivers);
 router.post("/logout", logout);
 router.get("/viewVehicles", isAuthenticated, sendVehicels);
 

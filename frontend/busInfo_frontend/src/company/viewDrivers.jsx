@@ -16,6 +16,20 @@ function Navbar() {
 }
 
 function UsersTable() {
+  const [drivers, setDrivers] = useState([]);
+
+  useEffect(() => {
+    const fetchDrivers = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/api/users/viewDrivers", { withCredentials: true });
+        setDrivers(response.data.drivers);
+      } catch (error) {
+        console.error("Error fetching drivers:", error);
+      }
+    };
+    fetchDrivers();
+  }, []);
+
 
     return (
       <div className="bg-gray-800 p-8">
@@ -24,23 +38,18 @@ function UsersTable() {
           <thead>
             <tr>
               <th className="px-4 py-2">Name</th>
-              <th className="px-4 py-2">License Number</th>
+              <th className="p4x-4 py-2">License Number</th>
               <th className="px-4 py-2">Phone number</th>
             </tr>
           </thead>
           <tbody className="text-gray-600 text-sm font-light">
-            {/* {users.map((user, index) => (
+            {drivers && drivers.map((driver, index) => (
           <tr key={index}>
-            <td className="border px-4 py-2">{user.driver_name || ' '}</td>
-            <td className="border px-4 py-2">{user.driver_licno || ' '}</td>
-            <td className="border px-4 py-2">{user.driver_phno || ' '}</td>
+            <td className="border px-4 py-2">{driver.driver_name || ' '}</td>
+            <td className="border px-4 py-2">{driver.driver_licno || ' '}</td>
+            <td className="border px-4 py-2">{driver.driver_phno || ' '}</td>
           </tr>
-        ))} */}
-        <tr>
-          <td className="border px-4 py-2">NIggaMan</td>
-          <td className="border px-4 py-2">69420911</td>
-          <td className="border px-4 py-2">13234568</td>
-        </tr>
+        ))}
           </tbody>
         </table>
         </div>
