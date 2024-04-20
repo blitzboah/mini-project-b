@@ -6,7 +6,7 @@ import re
 import cv2
 
 
-pytesseract.pytesseract.tesseract_cmd = r'C:/Program Files/Tesseract-OCR/tesseract.exe'
+pytesseract.pytesseract.tesseract_cmd = r'c:/Users/Neel Amarnath Mulik/AppData/Local/Programs/Tesseract-OCR/tesseract.exe'
 
 def extract_text_from_image(image_path):
     img = Image.open(image_path)
@@ -89,7 +89,7 @@ def extract_license_number(image_path):
     return None
 
 def template_matching_license_number(img):
-    template_img = cv2.imread(r"C:/Users/shraddha/OneDrive/Desktop/Works/main3.png", cv2.IMREAD_GRAYSCALE)
+    template_img = cv2.imread(r"C:/Users/Neel Amarnath Mulik/Mini4/mini-project-b/license-template.jpeg", cv2.IMREAD_GRAYSCALE)
 
     result = cv2.matchTemplate(img, template_img, cv2.TM_CCOEFF_NORMED)
     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
@@ -102,7 +102,7 @@ def template_matching_license_number(img):
     return extracted_text.strip()
 
 
-folder_path = r"C:/Users/shraddha/OneDrive/Desktop/Projg"
+folder_path = r"C:/Users/Neel Amarnath Mulik/Mini4/mini-project-b/example"
 image_files = [f for f in os.listdir(folder_path) if f.endswith(('.jpg', '.png', '.jpeg'))]
 
 row_idx = 2
@@ -133,7 +133,7 @@ for image_file in image_files:
 
     row_idx += 1
 
-output_file = r'C:/Users/shraddha/OneDrive/Desktop/SANDIP/License_9.xlsx'
+output_file = r'c:/Users/Neel Amarnath Mulik/Downloads/license_det.xlsx'
 wb.save(output_file)
 
 print(f"License information extracted and saved to {output_file}")
