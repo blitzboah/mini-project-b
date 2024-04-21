@@ -155,17 +155,18 @@ const login = async (req, res, cb) => {
 };
 
 const tripsCompleted = async (req, res, cb) => {
+  const tripEndTime = req.body.endTime;
   try {
     const trip = await db.query(
-      "SELECT trip_id, trip_time FROM trips WHERE trip_id=$1",
+      "SELECT trip_id, trip_starttime FROM trips WHERE trip_id=$1",
       [req.body.tripId]
     );
     const tripId = trip.rows[0].trip_id;
-    const tripDuration = trip.rows[0].trip_time;
     console.log(tripId);
     if (!tripId) {
       return res.status(404).json({ message: "Trip not found" });
     }
+    await db.query("INSERT INTO trips VALUES")
     const driver = await db.query(
       "SELECT * FROM assigned_trips WHERE trip_id=$1",
       [tripId]

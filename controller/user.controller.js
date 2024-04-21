@@ -116,15 +116,18 @@ const login = async (req, res, cb) => {
 
 const assignTasks = async (req, res, cb) => {
   const tripDate = req.body.date;
-  const tripDuration = req.body.duration;
-  if (!date || !duration) {
-    return res.status(400).json({ message: "Date and duration are required." });
+  const arrivingCity = req.body.arrivingCity;
+  const destinationCity = req.body.destinationCity;
+  const startTime = req.body.startTime;
+  const endTime = req.body.endTime;
+  if (!date || !arrivingCity || !destinationCity || !startTime || !endTime) {
+    return res.status(400).json({ message: "Incomplete information." });
   }
   try {
     const companyId = await getLoggedInUserCompanyId(req);
     const tripDetails = await db.query(
-      "INSERT INTO trips (trip_date,trip_time,c_id) VALUES ($1,$2,$3) RETURNING *",
-      [tripDate, tripDuration, companyId]
+      "INSERT INTO trips (trip_date,trip_arrivalcity,trip_destinationcity,trip_starttime,c_id) VALUES ($1,$2,$3,$4,$5) RETURNING *",
+      [tripDate, arrivingCity, destinationCity, startTime, companyId]
     );
     const trip_id = tripDetails.rows[0].trip_id;
     let assignedTrip;
