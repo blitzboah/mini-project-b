@@ -20,7 +20,7 @@ function TripsPage() {
   useEffect(() => {
     const fetchTrips = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/drivers/trips",{withCredentials:true});
+        const response = await axios.get("http://localhost:3000/api/drivers/trips", { withCredentials: true });
         setTrips(response.data.tripsDetails);
       } catch (error) {
         console.error("Error fetching trips:", error);
@@ -30,9 +30,34 @@ function TripsPage() {
   }, []);
 
   const formatDate = (dateString) => {
-    const [datePart, timePart] = dateString.split('T'); // Split date and time parts
-    const [year, month, day] = datePart.split('-'); // Split date into year, month, and day
-    return `${day}/${month}/${year}`; // Format date as day/month/year
+    const date = new Date(dateString);
+    return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`; // Format as day/month/year
+  };
+
+  const formatTime = (timeString) => {
+    const time = new Date(timeString);
+    return time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); // Format as HH:MM
+  };
+
+  const handleEndTimeChange = (index, event) => {
+    const newEndTime = event.target.value;
+    setTrips(prevTrips => {
+      const updatedTrips = [...prevTrips];
+      updatedTrips[index].trip_endtime = newEndTime;
+      return updatedTrips;
+    });
+  };
+
+  const handleSubmit = async (tripId, tripEndTime) => {
+    try {
+      // Send trip end time to the backend
+      await axios.post("http://localhost:3000/api/drivers/updateTripEndTime", {
+        tripId: tripId,
+        tripEndTime: tripEndTime
+      });
+    } catch (error) {
+      console.error("Error updating trip end time:", error);
+    }
   };
 
   return (
@@ -42,14 +67,23 @@ function TripsPage() {
           <thead>
             <tr>
               <th className="px-4 py-2 border">Trip Date</th>
-              <th className="px-4 py-2 border">Estimated Duration</th>
+              <th className="px-4 py-2 border">Trip Start Time</th>
+              <th className="px-4 py-2 border">Trip End Time</th>
             </tr>
           </thead>
           <tbody className="text-gray-600 text-sm font-light">
             {trips && trips.map((trip, index) => ( 
               <tr key={index}>
                 <td>{formatDate(trip.trip_date)}</td>
-                <td>{trip.trip_time}</td>
+                <td>{formatTime(trip.trip_starttime)}</td>
+                <td>
+                  <input
+                    type="time"
+                    value={trip.trip_endtime || ""}
+                    onChange={(event) => handleEndTimeChange(index, event)}
+                  />
+                  <button onClick={() => handleSubmit(trip.trip_id, trip.trip_endtime)}>Submit</button>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -58,7 +92,6 @@ function TripsPage() {
     </div>
   );
 }
-
 
 function DriversTrip(){
   return(

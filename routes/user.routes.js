@@ -41,7 +41,7 @@ const isAuthenticated = (req, res, next) => {
 
 router.post("/login", login);
 router.post("/register", register);
-router.post("/trips", isAuthenticated, assignTasks);
+router.post("/trips", assignTasks);
 router.post("/registerVehicle", regiserVehicles);
 router.get("/viewDrivers", sendDrivers);
 router.post("/logout", logout);
