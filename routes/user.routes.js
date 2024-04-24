@@ -45,7 +45,7 @@ router.post("/trips", assignTasks);
 router.post("/registerVehicle", regiserVehicles);
 router.get("/viewDrivers", sendDrivers);
 router.post("/logout", logout);
-router.get("/viewVehicles", isAuthenticated, sendVehicels);
+router.get("/viewVehicles", sendVehicels);
 
 db.connect();
 

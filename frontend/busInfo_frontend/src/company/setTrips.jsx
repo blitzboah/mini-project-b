@@ -43,20 +43,18 @@ function TripForms() {
     setFormData({ ...formData, [name]: value });
   };
 
-  const formatDateForDatabase = (timeString) => {
-    const [hours, minutes] = timeString.split(":");
-    const currentDate = new Date().toISOString().split("T")[0];
-    return `${currentDate} ${hours.padStart(2, "0")}:${minutes.padStart(
-      2,
-      "0"
-    )}:00`;
+  const formatDateForDatabase = (tripDate, tripStartTime) => {
+    const [hours, minutes] = tripStartTime.split(":");
+    const formattedDate = new Date(tripDate).toISOString().split("T")[0];
+    return `${formattedDate} ${hours.padStart(2, "0")}:${minutes.padStart(2, "0")}:00`;
   };
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const { destination, arrivalLocation, tripDate, tripStartTime } = formData;
     try {
-      const formattedTripStartTime = formatDateForDatabase(tripStartTime);
+      const formattedTripStartTime = formatDateForDatabase(tripDate, tripStartTime);
       const response = await axios.post(
         "http://localhost:3000/api/users/trips",
         {

@@ -124,7 +124,7 @@ const assignTasks = async (req, res, cb) => {
     const arrivingCity = req.body.arrivingCity;
     const destinationCity = req.body.destinationCity;
     const startTime = req.body.startTime;
-
+    console.log(startTime);
     // Check if all required fields are provided
     if (!tripDate || !arrivingCity || !destinationCity || !startTime) {
       return res.status(400).json({ message: "Incomplete information." });

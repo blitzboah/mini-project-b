@@ -47,13 +47,23 @@ function TripsPage() {
       return updatedTrips;
     });
   };
+  const formatDateForDatabase = (timeString) => {
+    const [hours, minutes] = timeString.split(":");
+    const currentDate = new Date().toISOString().split("T")[0];
+    return `${currentDate} ${hours.padStart(2, "0")}:${minutes.padStart(
+      2,
+      "0"
+    )}:00`;
+  };
 
   const handleSubmit = async (tripId, tripEndTime) => {
     try {
+      
+      const formattedTripEndTime = formatDateForDatabase(tripEndTime);
       // Send trip end time to the backend
       await axios.post("http://localhost:3000/api/drivers/updateTripEndTime", {
         tripId: tripId,
-        tripEndTime: tripEndTime
+        tripEndTime: formattedTripEndTime
       });
     } catch (error) {
       console.error("Error updating trip end time:", error);

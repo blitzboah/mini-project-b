@@ -130,7 +130,7 @@ const login = async (req, res, cb) => {
             const token = generateToken(user);
             res.cookie("token", token, {
               httpOnly: true,
-              maxAge: 1000* 60 * 60 * 24 * 7,
+              maxAge: 1000 * 60 * 60 * 24 * 7,
               secure: true,
             });
             console.log(token);
@@ -218,9 +218,10 @@ const login = async (req, res, cb) => {
 // };
 
 const tripsCompleted = async (req, res, cb) => {
-  const tripEndTime = req.body.endTime;
+  // const tripEndTime = req.body.tripEndTime;
+  const tripEndTime = new Date(req.body.tripEndTime); 
+  console.log(tripEndTime);
   try {
-    // Retrieve trip information including trip start time
     const trip = await db.query(
       "SELECT trip_id, trip_starttime FROM trips WHERE trip_id=$1",
       [req.body.tripId]
@@ -231,18 +232,24 @@ const tripsCompleted = async (req, res, cb) => {
     if (!tripId) {
       return res.status(404).json({ message: "Trip not found" });
     }
-    // Update trip end time
-    await db.query("UPDATE trips SET trip_endtime=$1 WHERE trip_id=$2", [
-      tripEndTime,
-      tripId,
-    ]);
 
-    // Calculate trip duration
+    // Check if trip end time is after start time
     const tripEndTimeDate = new Date(tripEndTime);
+    if (tripEndTimeDate <= tripStartTime) {
+      return res
+        .status(400)
+        .json({ message: "End time must be after start time" });
+    }
+    console.log(tripEndTimeDate);
+    console.log(tripStartTime);
+    // Calculate trip duration
     const tripDuration = tripEndTimeDate - tripStartTime; // Difference in milliseconds
-    // Convert milliseconds to hours
-    const tripDurationHours = tripDuration / (1000 * 60 * 60);
-
+    // Check if trip duration is a valid number
+    if (isNaN(tripDuration)) {
+      console.log("Invalid trip duration");
+      return res.status(400).json({ message: "Invalid trip duration" });
+    }
+    const tripDurationHours = Math.round(tripDuration / (1000 * 60 * 60));
     // Retrieve driver information
     const driver = await db.query(
       "SELECT * FROM assigned_trips WHERE trip_id=$1",
@@ -279,7 +286,9 @@ const tripsCompleted = async (req, res, cb) => {
       }
     }
     // Delete trip from assigned_trips table
-    if (await db.query("DELETE FROM assigned_trips WHERE trip_id = $1", [tripId])) {
+    if (
+      await db.query("DELETE FROM assigned_trips WHERE trip_id = $1", [tripId])
+    ) {
       console.log(`Trip deleted from assigned trips table`);
     }
     // Delete trip from trips table
