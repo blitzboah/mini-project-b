@@ -130,18 +130,16 @@ const login = async (req, res, cb) => {
             const token = generateToken(user);
             res.cookie("token", token, {
               httpOnly: true,
-              maxAge: 60 * 60 * 24 * 7,
+              maxAge: 1000 * 60 * 60 * 24 * 7,
               secure: true,
             });
             console.log(token);
-            res
-              .status(200)
-              .json({
-                success: true,
-                message: `User was logged in Successfully`,
-                user,
-                token,
-              });
+            res.status(200).json({
+              success: true,
+              message: `User was logged in Successfully`,
+              user,
+              token,
+            });
           } else {
             res.status(401).json({ message: "Incorrect Password" });
           }
@@ -154,30 +152,118 @@ const login = async (req, res, cb) => {
   }
 };
 
+// const tripsCompleted = async (req, res, cb) => {
+//   const tripEndTime = req.body.endTime;
+//   try {
+//     const trip = await db.query(
+//       "SELECT trip_id, trip_starttime FROM trips WHERE trip_id=$1",
+//       [req.body.tripId]
+//     );
+//     const tripId = trip.rows[0].trip_id;
+//     console.log(tripId);
+//     if (!tripId) {
+//       return res.status(404).json({ message: "Trip not found" });
+//     }
+//     await db.query("UPDATE trips SET trip_endtime=$1 WHERE trip_id=$2", [
+//       tripEndTime,
+//       tripId,
+//     ]);
+//     const driver = await db.query(
+//       "SELECT * FROM assigned_trips WHERE trip_id=$1",
+//       [tripId]
+//     );
+//     const driverId = driver.rows[0].d_id;
+//     const drivingHrs = driver.rows[0].driving_hrs;
+//     console.log(tripDuration);
+//     if (drivingHrs === null) {
+//       await db.query("BEGIN");
+//       const updateResult = await db.query(
+//         "UPDATE drivers SET driving_hrs=$1 WHERE d_id=$2",
+//         [tripDuration, driverId]
+//       );
+//       await db.query("COMMIT");
+//       if (updateResult.rowCount > 0) {
+//         console.log(`Driving hours successfully updated`);
+//       } else {
+//         console.log(`No rows were updated`);
+//       }
+//     } else {
+//       await db.query("BEGIN");
+//       const updateResult = await db.query(
+//         "UPDATE drivers SET driving_hrs=driving_hrs+$1 WHERE d_id=$2",
+//         [tripDuration, driverId]
+//       );
+//       await db.query("COMMIT");
+//       if (updateResult.rowCount > 0) {
+//         console.log(`Driving hours successfully updated`);
+//       } else {
+//         console.log(`No rows were updated`);
+//       }
+//     }
+//     if (
+//       await db.query("DELETE FROM assigned_trips WHERE trip_id = $1", [tripId])
+//     ) {
+//       console.log(`Trip deleted from assigned trips table`);
+//     }
+//     if (await db.query("DELETE FROM trips WHERE trip_id = $1", [tripId])) {
+//       console.log(`Trip deleted from trips table`);
+//     }
+//     return res.status(200).json({ message: "Trip completed successfully" });
+//   } catch (error) {
+//     console.error("Error completing trip:", error);
+//     res
+//       .status(500)
+//       .json({ message: "An error occurred while completing the trip" });
+//   }
+// };
+
 const tripsCompleted = async (req, res, cb) => {
+  // const tripEndTime = req.body.tripEndTime;
+  const tripEndTime = new Date(req.body.tripEndTime); 
+  console.log(tripEndTime);
   try {
     const trip = await db.query(
-      "SELECT trip_id, trip_time FROM trips WHERE trip_id=$1",
+      "SELECT trip_id, trip_starttime FROM trips WHERE trip_id=$1",
       [req.body.tripId]
     );
     const tripId = trip.rows[0].trip_id;
-    const tripDuration = trip.rows[0].trip_time;
+    const tripStartTime = new Date(trip.rows[0].trip_starttime); // Convert to Date object
     console.log(tripId);
     if (!tripId) {
       return res.status(404).json({ message: "Trip not found" });
     }
+
+    // Check if trip end time is after start time
+    const tripEndTimeDate = new Date(tripEndTime);
+    if (tripEndTimeDate <= tripStartTime) {
+      return res
+        .status(400)
+        .json({ message: "End time must be after start time" });
+    }
+    console.log(tripEndTimeDate);
+    console.log(tripStartTime);
+    // Calculate trip duration
+    const tripDuration = tripEndTimeDate - tripStartTime; // Difference in milliseconds
+    // Check if trip duration is a valid number
+    if (isNaN(tripDuration)) {
+      console.log("Invalid trip duration");
+      return res.status(400).json({ message: "Invalid trip duration" });
+    }
+    const tripDurationHours = Math.round(tripDuration / (1000 * 60 * 60));
+    // Retrieve driver information
     const driver = await db.query(
       "SELECT * FROM assigned_trips WHERE trip_id=$1",
       [tripId]
     );
     const driverId = driver.rows[0].d_id;
     const drivingHrs = driver.rows[0].driving_hrs;
-    console.log(tripDuration);
+    console.log(tripDurationHours);
     if (drivingHrs === null) {
+      // If driving hours are null, set them to trip duration
       await db.query("BEGIN");
       const updateResult = await db.query(
         "UPDATE drivers SET driving_hrs=$1 WHERE d_id=$2",
-        [tripDuration, driverId]
+        [tripDurationHours, driverId]
       );
       await db.query("COMMIT");
       if (updateResult.rowCount > 0) {
@@ -186,10 +272,11 @@ const tripsCompleted = async (req, res, cb) => {
         console.log(`No rows were updated`);
       }
     } else {
+      // If driving hours are not null, add trip duration to existing driving hours
       await db.query("BEGIN");
       const updateResult = await db.query(
         "UPDATE drivers SET driving_hrs=driving_hrs+$1 WHERE d_id=$2",
-        [tripDuration, driverId]
+        [tripDurationHours, driverId]
       );
       await db.query("COMMIT");
       if (updateResult.rowCount > 0) {
@@ -198,11 +285,13 @@ const tripsCompleted = async (req, res, cb) => {
         console.log(`No rows were updated`);
       }
     }
+    // Delete trip from assigned_trips table
     if (
       await db.query("DELETE FROM assigned_trips WHERE trip_id = $1", [tripId])
     ) {
       console.log(`Trip deleted from assigned trips table`);
     }
+    // Delete trip from trips table
     if (await db.query("DELETE FROM trips WHERE trip_id = $1", [tripId])) {
       console.log(`Trip deleted from trips table`);
     }
@@ -233,13 +322,12 @@ const sendTrips = async (req, res) => {
         tripsDetails.push(tripDetails.rows[0]);
       }
     }
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Trips sent successfully",
-        tripsDetails,
-      });
+    console.log(tripsDetails);
+    res.status(200).json({
+      success: true,
+      message: "Trips sent successfully",
+      tripsDetails,
+    });
   } catch (error) {
     console.error("Error rendering viewDrivers:", error);
     res.status(500).send("Internal Server Error");

@@ -115,46 +115,90 @@ const login = async (req, res, cb) => {
 };
 
 const assignTasks = async (req, res, cb) => {
-  const tripDate = req.body.date;
-  const tripDuration = req.body.duration;
-  if (!date || !duration) {
-    return res.status(400).json({ message: "Date and duration are required." });
-  }
+  let tasksAssigned = false; // Flag to track if tasks were successfully assigned
+
   try {
+    console.log("Starting assignTasks function");
+
+    const tripDate = req.body.date;
+    const arrivingCity = req.body.arrivingCity;
+    const destinationCity = req.body.destinationCity;
+    const startTime = req.body.startTime;
+    console.log(startTime);
+    // Check if all required fields are provided
+    if (!tripDate || !arrivingCity || !destinationCity || !startTime) {
+      return res.status(400).json({ message: "Incomplete information." });
+    }
+
+    // Get the company ID of the logged-in user
     const companyId = await getLoggedInUserCompanyId(req);
+
+    console.log("After getting company ID");
+
+    // Insert trip details into the database
     const tripDetails = await db.query(
-      "INSERT INTO trips (trip_date,trip_time,c_id) VALUES ($1,$2,$3) RETURNING *",
-      [tripDate, tripDuration, companyId]
+      "INSERT INTO trips (trip_date, trip_arrivalcity, trip_destinationcity, trip_starttime, c_id) VALUES ($1, $2, $3, $4, $5) RETURNING trip_id",
+      [tripDate, arrivingCity, destinationCity, startTime, companyId]
     );
     const trip_id = tripDetails.rows[0].trip_id;
-    let assignedTrip;
-    let driverNumber;
-    let driver;
-    do {
-      const trips = await db.query("SELECT * FROM trips WHERE trip_id=$1", [
+
+    console.log("After inserting trip details into the database");
+
+    let assignedTrip = null;
+    let driver = null;
+
+    // Loop until a driver is assigned or a maximum number of attempts is reached
+    const maxAttempts = 100; // Define a maximum number of attempts to prevent infinite loop
+    let attemptCount = 0;
+
+    while (!assignedTrip && attemptCount < maxAttempts) {
+      attemptCount++;
+
+      // Fetch the trip details
+      const trips = await db.query("SELECT * FROM trips WHERE trip_id = $1", [
         trip_id,
       ]);
       const tripDetails = trips.rows[0];
+
+      // Fetch all drivers
       const driverDetails = await db.query("SELECT * FROM drivers");
       const drivers = driverDetails.rows;
-      driverNumber = Math.floor(Math.random() * drivers.length);
+
+      // Randomly select a driver
+      const driverNumber = Math.floor(Math.random() * drivers.length);
       driver = drivers[driverNumber];
-      const driverNo = driver.c_id;
-      const driverDrivingHrs = driver.driving_hrs;
-      if (driverNo !== companyId || driverDrivingHrs >= 48) {
-        continue;
+
+      // Check if the selected driver belongs to the same company and their driving hours are less than 48
+      if (driver.c_id === companyId && driver.driving_hrs < 48) {
+        // Assign the trip to the selected driver
+        assignedTrip = await db.query(
+          "INSERT INTO assigned_trips (d_id, trip_id) VALUES ($1, $2)",
+          [driver.d_id, trip_id]
+        );
       }
-      assignedTrip = await db.query(
-        "INSERT INTO assigned_trips VALUES ($1,$2)",
-        [driver.d_id, tripDetails.trip_id]
-      );
-    } while (!assignedTrip);
-    res.status(200).json({ message: "Tasks assigned successfully." });
+    }
+
+    console.log("After attempting to assign a driver");
+
+    if (assignedTrip) {
+      // Update flag to indicate tasks were successfully assigned
+      tasksAssigned = true;
+      console.log("Tasks assigned successfully.");
+    } else {
+      console.log("Failed to assign tasks. Please try again later.");
+    }
   } catch (error) {
-    console.log(error);
-    res
-      .status(500)
-      .json({ message: "An error occurred while assigning tasks." });
+    // Log the error
+    console.error("Error assigning tasks:", error);
+  } finally {
+    // Send response based on whether tasks were successfully assigned
+    if (tasksAssigned) {
+      return res.status(200).json({ message: "Tasks assigned successfully." });
+    } else {
+      return res
+        .status(500)
+        .json({ message: "An error occurred while assigning tasks." });
+    }
   }
 };
 

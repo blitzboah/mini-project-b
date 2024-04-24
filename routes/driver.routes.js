@@ -57,8 +57,8 @@ router.get("/isAuthenticated", isAuthenticated);
 router.get("/trips", sendTrips);
 router.post("/login", login);
 router.post("/register", upload.single("licensePhoto"), register);
-router.post("/trips", tripsCompleted);
-router.patch("/updateDriverLicExp", isAuthenticated, updateDriversLicExp);
+router.post("/updateTripEndTime", tripsCompleted);
+router.patch("/updateDriverLicExp", updateDriversLicExp);
 router.post("/logout", logout);
 
 db.connect();
