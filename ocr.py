@@ -29,11 +29,15 @@ def find_name_licence_validity(text):
     licence_number = ''
     validity = ''
     lice=''
+    validity1=''
+    
+    
 
     # print("in fun", text)
     alphanumeric_pattern = re.compile(r'\b[A-Za-z0-9]{6,20}\b')  # Updated regex pattern
     #print("text", text)
     licence_keywords = ['licence number', 'dl no', 'dl number']
+    
 
     for line in lines:
         # match_alphanumeric = alphanumeric_pattern.findall(line)
@@ -44,31 +48,30 @@ def find_name_licence_validity(text):
             # if 9 <= len(potential_licence) <= 20:
             #     # print("licence 2", potential_licence)
             #     licence_number = potential_licence
-        if 'licence no.' in line.lower() or 'dl no' in line.lower()  and '=' not in line:
+        if 'licence no.' in line.lower() or 'dl no' in line.lower()  and '=' not in line: 
             licence_number = line.split(':')[-1].strip()
-            licence_number = line.split(';')[-1].strip()
-            for i in licence_number:
-                if(i!='(' or i!=' '):
-                    lice+=i
-                else:
-                    break
+            lice=licence_number[:17]
+                
 
-        if 'valid' in line.lower() or 'expiry' in line.lower() or 'valid till' in line.lower():
+        if 'valid' in line.lower() or 'expiry' in line.lower() or 'valid till' in line.lower() or 'validity' in line.lower():
             validity = line.split(':')[-1].strip()
-            validity = line.split(';')[-1].strip()
+            validity1=validity[:10]
+            
 
         if 'name' in line.lower() and '=' not in line:
             name = line.split(':')[-1].strip() 
+          
+            
 
 
         for keyword in licence_keywords:
             if keyword in line.lower() and '=' not in line:
                 licence_number = line.split(':')[-1].strip()
-              
-    return name, lice, validity
+               
+    return name, lice, validity1
 
 def extract_license_number(image_path):
-    print("comes in fun")
+    
     img = cv2.imread(image_path)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
@@ -89,7 +92,7 @@ def extract_license_number(image_path):
     return None
 
 def template_matching_license_number(img):
-    template_img = cv2.imread(r"C:/Users/Neel Amarnath Mulik/Mini4/mini-project-b/license-template.jpeg", cv2.IMREAD_GRAYSCALE)
+    template_img = cv2.imread(r"C:/Users/Neel Amarnath Mulik/Downloads/license-template.jpeg", cv2.IMREAD_GRAYSCALE)
 
     result = cv2.matchTemplate(img, template_img, cv2.TM_CCOEFF_NORMED)
     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
@@ -102,8 +105,15 @@ def template_matching_license_number(img):
     return extracted_text.strip()
 
 
-folder_path = r"C:/Users/Neel Amarnath Mulik/Mini4/mini-project-b/example"
+folder_path = r'C:/Users/Neel Amarnath Mulik/Mini4/mini-project-b/example'
 image_files = [f for f in os.listdir(folder_path) if f.endswith(('.jpg', '.png', '.jpeg'))]
+
+# Sort the image files numerically
+image_files.sort(key=lambda x: int(re.search(r'\d+', x).group()))
+
+# Initialize row index for writing to Excel
+
+
 
 row_idx = 2
 wb = Workbook()
@@ -111,6 +121,8 @@ ws = wb.active
 ws.cell(row=1, column=1, value='Name')
 ws.cell(row=1, column=2, value='Licence Number')
 ws.cell(row=1, column=3, value='Validity')
+ws.cell(row=1, column=4, value='File name')  # Add a new column for file names
+
 
 for image_file in image_files:
     image_path = os.path.join(folder_path, image_file)
@@ -130,6 +142,7 @@ for image_file in image_files:
     ws.cell(row=row_idx, column=1, value=name)
     ws.cell(row=row_idx, column=2, value=licence_number)
     ws.cell(row=row_idx, column=3, value=validity)
+    ws.cell(row=row_idx, column=4, value=image_file)
 
     row_idx += 1
 
