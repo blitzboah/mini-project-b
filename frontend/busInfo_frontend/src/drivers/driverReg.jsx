@@ -7,8 +7,8 @@ import "./bg.css";
 
 function Navbar() {
   return (
-    <nav className="flex justify-center items-center flex-wrap bg-gray-900 p-4">
-      <Link to="/" className="text-cyan-400 underline-none mr-auto text-xl">
+    <nav className="flex justify-center items-center flex-wrap bg-gray-900 p-4 font-sans"> {/* Apply font-sans class to the nav element */}
+      <Link to="/" className="text-cyan-400 underline-none mr-auto text-xl font-serif">
         BusInfo
       </Link>
       <div className="flex justify-center items-center space-x-4">
@@ -25,6 +25,8 @@ function Navbar() {
     </nav>
   );
 }
+
+
 
 function DriverForms() {
   const [formData, setFormData] = useState({

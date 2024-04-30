@@ -7,6 +7,7 @@ import VehiclePage from './company/vehicleReg.jsx';
 import ViewVehicle from './company/viewVehicles.jsx';
 import ViewDriversPage from './company/viewDrivers.jsx';
 import SetTrip from './company/setTrips.jsx';
+import './App.css';
 
 function CompanyApp() {
   return (

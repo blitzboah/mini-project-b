@@ -8,16 +8,16 @@ import "./bg.css";
 function Navbar() {
   return (
     <nav className="flex justify-center items-center flex-wrap bg-gray-900 p-4">
-      <Link to="/" className="text-cyan-400 underline-none mr-auto text-xl">
+      <Link to="/" className="text-cyan-400 font-serif underline-none mr-auto text-xl">
         BusInfo
       </Link>
       <div className="flex justify-center items-center space-x-4">
-        <Link to="/" className="text-white hover:text-blue-400 underline-none">
+        <Link to="/" className="text-white hover:text-blue-400 underline-none font-sans">
           Home
         </Link>
         <Link
           to="/company"
-          className="text-white hover:text-blue-400 underline-none"
+          className="text-white hover:text-blue-400 underline-none font-sans"
         >
           Company
         </Link>
@@ -25,6 +25,7 @@ function Navbar() {
     </nav>
   );
 }
+
 
 
 function LoginDriver() {

@@ -5,14 +5,15 @@ import axios from 'axios';
 function Navbar() {
   return (
     <nav className="flex justify-center items-center flex-wrap bg-gray-900 p-4">
-      <Link to="/" className="text-cyan-400 underline-none mr-auto text-xl">BusInfo</Link>
+      <Link to="/" className="text-cyan-400 underline-none mr-auto text-xl font-serif">BusInfo</Link>
       <div className="flex justify-center items-center space-x-4">
-        <Link to="/driverPage" className="text-white hover:text-blue-500 underline-none">Home</Link>
-        <Link to="/" className="text-white hover:text-blue-500 underline-none">Logout</Link>
+        <Link to="/" className="text-white hover:text-blue-500 underline-none font-sans">Home</Link>
+        <Link to="/" className="text-white hover:text-blue-500 underline-none font-sans">Logout</Link>
       </div>
     </nav>
   )
 }
+
 
 function TripsPage() {
   const [trips, setTrips] = useState([]);
