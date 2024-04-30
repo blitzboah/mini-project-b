@@ -24,6 +24,15 @@ const generateToken = (user) => {
   return jwt.sign(payload, secret, options);
 };
 
+const transporter = nodemailer.createTransport({
+  host: "smtp.ethereal.email",
+  port: 587,
+  auth: {
+    user: process.env.EMAIL,
+    pass: process.env.PASSWORD,
+  },
+});
+
 const register = async (req, res, next) => {
   const cName = req.body.companyName;
   const name = req.body.driverName;
@@ -38,7 +47,6 @@ const register = async (req, res, next) => {
 
   try {
     if (!licensePhoto) {
-      // If licensePhoto is undefined, return an error response
       return res.status(400).json({ message: "License photo is required" });
     }
 
@@ -152,71 +160,6 @@ const login = async (req, res, cb) => {
   }
 };
 
-// const tripsCompleted = async (req, res, cb) => {
-//   const tripEndTime = req.body.endTime;
-//   try {
-//     const trip = await db.query(
-//       "SELECT trip_id, trip_starttime FROM trips WHERE trip_id=$1",
-//       [req.body.tripId]
-//     );
-//     const tripId = trip.rows[0].trip_id;
-//     console.log(tripId);
-//     if (!tripId) {
-//       return res.status(404).json({ message: "Trip not found" });
-//     }
-//     await db.query("UPDATE trips SET trip_endtime=$1 WHERE trip_id=$2", [
-//       tripEndTime,
-//       tripId,
-//     ]);
-//     const driver = await db.query(
-//       "SELECT * FROM assigned_trips WHERE trip_id=$1",
-//       [tripId]
-//     );
-//     const driverId = driver.rows[0].d_id;
-//     const drivingHrs = driver.rows[0].driving_hrs;
-//     console.log(tripDuration);
-//     if (drivingHrs === null) {
-//       await db.query("BEGIN");
-//       const updateResult = await db.query(
-//         "UPDATE drivers SET driving_hrs=$1 WHERE d_id=$2",
-//         [tripDuration, driverId]
-//       );
-//       await db.query("COMMIT");
-//       if (updateResult.rowCount > 0) {
-//         console.log(`Driving hours successfully updated`);
-//       } else {
-//         console.log(`No rows were updated`);
-//       }
-//     } else {
-//       await db.query("BEGIN");
-//       const updateResult = await db.query(
-//         "UPDATE drivers SET driving_hrs=driving_hrs+$1 WHERE d_id=$2",
-//         [tripDuration, driverId]
-//       );
-//       await db.query("COMMIT");
-//       if (updateResult.rowCount > 0) {
-//         console.log(`Driving hours successfully updated`);
-//       } else {
-//         console.log(`No rows were updated`);
-//       }
-//     }
-//     if (
-//       await db.query("DELETE FROM assigned_trips WHERE trip_id = $1", [tripId])
-//     ) {
-//       console.log(`Trip deleted from assigned trips table`);
-//     }
-//     if (await db.query("DELETE FROM trips WHERE trip_id = $1", [tripId])) {
-//       console.log(`Trip deleted from trips table`);
-//     }
-//     return res.status(200).json({ message: "Trip completed successfully" });
-//   } catch (error) {
-//     console.error("Error completing trip:", error);
-//     res
-//       .status(500)
-//       .json({ message: "An error occurred while completing the trip" });
-//   }
-// };
-
 const tripsCompleted = async (req, res, cb) => {
   // const tripEndTime = req.body.tripEndTime;
   const tripEndTime = new Date(req.body.tripEndTime); 
@@ -251,10 +194,11 @@ const tripsCompleted = async (req, res, cb) => {
     }
     const tripDurationHours = Math.round(tripDuration / (1000 * 60 * 60));
     // Retrieve driver information
-    const driver = await db.query(
+    const driverTrip = await db.query(
       "SELECT * FROM assigned_trips WHERE trip_id=$1",
       [tripId]
     );
+    const driver = await db.query("SELECT * FROM drivers WHERE d_id=$1",[driverTrip.rows[0].d_id]);
     const driverId = driver.rows[0].d_id;
     const drivingHrs = driver.rows[0].driving_hrs;
     console.log(tripDurationHours);
@@ -285,6 +229,12 @@ const tripsCompleted = async (req, res, cb) => {
         console.log(`No rows were updated`);
       }
     }
+    const comp = await db.query("SELECT * FROM drivers WHERE d_id=$1",[driverId]);
+    // console.log(comp.rows[0].c_id);
+    const companyDetails = await db.query("SELECT * FROM company WHERE c_id=$1",[comp.rows[0].c_id]);
+    // console.log(companyDetails);
+    const companyEmail = companyDetails.rows[0].company_email;
+
     // Delete trip from assigned_trips table
     if (
       await db.query("DELETE FROM assigned_trips WHERE trip_id = $1", [tripId])
@@ -294,8 +244,35 @@ const tripsCompleted = async (req, res, cb) => {
     // Delete trip from trips table
     if (await db.query("DELETE FROM trips WHERE trip_id = $1", [tripId])) {
       console.log(`Trip deleted from trips table`);
+
+      // Send completion email
+      const emailMessage = `
+        Trip completed successfully!\n
+        Trip ID: ${tripId}\n
+        Trip Start Time: ${tripStartTime}\n
+        Trip End Time: ${tripEndTime}\n
+        Trip Duration (Hours): ${tripDurationHours}\n
+        Driver ID: ${driverId}\n
+        Driving Hours: ${drivingHrs}\n
+      `;
+
+      const emailOptions = {
+        from: process.env.EMAIL,
+        to: companyEmail,
+        subject: "Trip Completed!!",
+        text: emailMessage,
+      };
+
+      transporter.sendMail(emailOptions, (error, info) => {
+        if (error) {
+          console.error('Error sending email:', error);
+        } else {
+          console.log('Email sent:', info.response);
+        }
+      });
+
+      return res.status(200).json({ message: "Trip completed successfully" });
     }
-    return res.status(200).json({ message: "Trip completed successfully" });
   } catch (error) {
     console.error("Error completing trip:", error);
     res
@@ -307,10 +284,12 @@ const tripsCompleted = async (req, res, cb) => {
 const sendTrips = async (req, res) => {
   try {
     const driverId = await getLoggedInUserCompanyId(req);
+    console.log(driverId);
     const assignedTrips = await db.query(
       "SELECT trip_id FROM assigned_trips WHERE d_id=$1",
       [driverId]
     );
+    console.log(assignedTrips);
     const tripsDetails = [];
     for (const tripRow of assignedTrips.rows) {
       const tripId = tripRow.trip_id;
@@ -322,7 +301,7 @@ const sendTrips = async (req, res) => {
         tripsDetails.push(tripDetails.rows[0]);
       }
     }
-    console.log(tripsDetails);
+    // console.log(tripsDetails);
     res.status(200).json({
       success: true,
       message: "Trips sent successfully",
@@ -343,14 +322,7 @@ const resetDrivingHours = async () => {
   }
 };
 
-const transporter = nodemailer.createTransport({
-  host: "smtp.ethereal.email",
-  port: 587,
-  auth: {
-    user: process.env.EMAIL,
-    pass: process.env.PASSWORD,
-  },
-});
+
 
 const getAllRegisteredCompanies = async (req) => {
   const companies = await db.query("SELECT * FROM company");

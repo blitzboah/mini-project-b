@@ -227,10 +227,13 @@ const regiserVehicles = async (req, res, cb) => {
 const sendVehicels = async (req, res, cb) => {
   try {
     const companyId = await getLoggedInUserCompanyId(req);
+    console.log(companyId)
     const result = await db.query("SELECT * FROM vehicles WHERE c_id=$1", [
       companyId,
     ]);
-    res.status(200).json(result);
+    const vehicles =result.rows;
+    console.log(result);
+    res.status(200).json({success:true,message:"Drivers sent successfully",vehicles,});
   } catch (error) {
     console.error("Error renderinf viewVehicles:", error);
     res

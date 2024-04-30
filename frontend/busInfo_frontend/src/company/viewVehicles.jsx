@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 import './bg.css'
 
 function Navbar() {
@@ -17,17 +18,22 @@ function Navbar() {
 function ViewVehicle() {
     const [vehicles, setVehicles] = useState([]);
   
-    useEffect(() => {
-      // Fetch vehicles data here and set it to state
-      const fetchVehicles = async () => {
-        // Example fetch request
-        const response = await fetch('/api/vehicles');
-        const data = await response.json();
-        setVehicles(data);
-      };
-  
-      fetchVehicles();
-    }, []);
+  useEffect(() => {
+    const fetchDrivers = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/api/users/viewVehicles", { withCredentials: true });
+        setVehicles(response.data.vehicles);
+      } catch (error) {
+        console.error("Error fetching drivers:", error);
+      }
+    };
+    fetchDrivers();
+  }, []);
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`; // Format as day/month/year
+  };
   
     return (
       <div className="bg-gray-700 p-8">
@@ -35,25 +41,17 @@ function ViewVehicle() {
           <table className="table-auto w-full">
             <thead>
               <tr>
-                <th className="px-4 py-2">Name</th>
-                <th className="px-4 py-2">License Number</th>
+                <th className="px-4 py-2">Vehicle Identification Number</th>
+                <th className="px-4 py-2">Permit Expiry Date</th>
               </tr>
             </thead>
             <tbody>
-              {vehicles.map((vehicle, index) => (
+              {vehicles && vehicles.map((vehicle, index) => (
                 <tr key={index}>
                   <td className="border px-4 py-2">{vehicle.v_vin || ' '}</td>
-                  <td className="border px-4 py-2">{vehicle.v_perexp || ' '}</td>
+                  <td className="border px-4 py-2">{formatDate(vehicle.v_perexp) || ' '}</td>
                 </tr>
               ))}
-              <tr>
-                <td className="border px-4 py-2">Ferrari</td>
-                <td className="border px-4 py-2">2047</td>
-              </tr>
-              <tr>
-                <td className="border px-4 py-2">Omni</td>
-                <td className="border px-4 py-2">2069</td>
-              </tr>
             </tbody>
           </table>
         </div>
