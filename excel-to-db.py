@@ -37,7 +37,7 @@ for i, row in enumerate(sheet.iter_rows(values_only=True)):
 
     # Use the date string as it is
     date_string = row[2]
-    image_path="uploads/"+row[3]
+    image_path="uploads\\"+row[3]
 
     # Insert the data into the database
     insert_stmt = "INSERT INTO ocr (driver_name, driver_licno, driver_licesp, driver_photo) VALUES (%s, %s, %s, %s)"
