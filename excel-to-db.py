@@ -35,13 +35,20 @@ for i, row in enumerate(sheet.iter_rows(values_only=True)):
     if i == 0:
         continue
 
-    # Use the date string as it is
-    date_string = row[2]
-    image_path="uploads\\"+row[3]
+    # Check if the record already exists based on driver_licno or driver_photo
+    cur.execute("SELECT COUNT(*) FROM ocr WHERE driver_licno = %s OR driver_photo = %s", (row[1], "uploads\\" + row[3]))
+    existing_count = cur.fetchone()[0]
 
-    # Insert the data into the database
-    insert_stmt = "INSERT INTO ocr (driver_name, driver_licno, driver_licesp, driver_photo) VALUES (%s, %s, %s, %s)"
-    cur.execute(insert_stmt, (row[0], row[1], date_string, image_path))
+    if existing_count == 0:  # Record doesn't exist, insert it
+        # Use the date string as it is
+        date_string = row[2]
+        image_path = "uploads\\" + row[3]
+
+        # Insert the data into the database
+        insert_stmt = "INSERT INTO ocr (driver_name, driver_licno, driver_licesp, driver_photo) VALUES (%s, %s, %s, %s)"
+        cur.execute(insert_stmt, (row[0], row[1], date_string, image_path))
+    else:
+        print("Record already exists, skipping insertion.")
 
 # Commit the changes
 conn.commit()
