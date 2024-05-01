@@ -135,57 +135,38 @@ const assignTasks = async (req, res, cb) => {
 
     console.log("After getting company ID");
 
-    // Insert trip details into the database
-    const tripDetails = await db.query(
-      "INSERT INTO trips (trip_date, trip_arrivalcity, trip_destinationcity, trip_starttime, c_id) VALUES ($1, $2, $3, $4, $5) RETURNING trip_id",
-      [tripDate, arrivingCity, destinationCity, startTime, companyId]
-    );
-    const trip_id = tripDetails.rows[0].trip_id;
-
-    console.log("After inserting trip details into the database");
-
     let assignedTrip = null;
     let driver = null;
 
-    // Loop until a driver is assigned or a maximum number of attempts is reached
-    const maxAttempts = 100; // Define a maximum number of attempts to prevent infinite loop
-    let attemptCount = 0;
+    // Fetch all drivers who are verified and belong to the same company
+    const driverDetails = await db.query("SELECT * FROM drivers WHERE c_id = $1 AND driver_verified = TRUE", [companyId]);
+    const drivers = driverDetails.rows;
 
-    while (!assignedTrip && attemptCount < maxAttempts) {
-      attemptCount++;
+    // Check if any verified drivers are available
+    if (drivers.length === 0) {
+      return res.status(404).json({ message: "No verified drivers available." });
+    }
 
-      // Fetch the trip details
-      const trips = await db.query("SELECT * FROM trips WHERE trip_id = $1", [
-        trip_id,
-      ]);
-      const tripDetails = trips.rows[0];
-
-      // Fetch all drivers
-      const driverDetails = await db.query("SELECT * FROM drivers");
-      const drivers = driverDetails.rows;
-
-      // Randomly select a driver
-      const driverNumber = Math.floor(Math.random() * drivers.length);
-      driver = drivers[driverNumber];
-
-      // Check if the selected driver belongs to the same company and their driving hours are less than 48
-      if (driver.c_id === companyId && driver.driving_hrs < 48) {
+    // Loop until a driver is assigned or all verified drivers are checked
+    for (const driver of drivers) {
+      // Check if the driver's driving hours are less than 48
+      if (driver.driving_hrs < 48) {
         // Assign the trip to the selected driver
         assignedTrip = await db.query(
-          "INSERT INTO assigned_trips (d_id, trip_id) VALUES ($1, $2)",
-          [driver.d_id, trip_id]
+          "INSERT INTO assigned_trips (d_id, trip_date, trip_arrivalcity, trip_destinationcity, trip_starttime) VALUES ($1, $2, $3, $4, $5)",
+          [driver.d_id, tripDate, arrivingCity, destinationCity, startTime]
         );
+        // Update flag to indicate tasks were successfully assigned
+        tasksAssigned = true;
+        console.log("Tasks assigned successfully.");
+        break; // Exit the loop if a driver is assigned
       }
     }
 
     console.log("After attempting to assign a driver");
 
-    if (assignedTrip) {
-      // Update flag to indicate tasks were successfully assigned
-      tasksAssigned = true;
-      console.log("Tasks assigned successfully.");
-    } else {
-      console.log("Failed to assign tasks. Please try again later.");
+    if (!tasksAssigned) {
+      console.log("Failed to assign tasks. No eligible driver found.");
     }
   } catch (error) {
     // Log the error
@@ -197,10 +178,11 @@ const assignTasks = async (req, res, cb) => {
     } else {
       return res
         .status(500)
-        .json({ message: "An error occurred while assigning tasks." });
+        .json({ message: "An error occurred while assigning tasks. No eligible driver found." });
     }
   }
 };
+
 
 const regiserVehicles = async (req, res, cb) => {
   const vin = req.body.busNumber;
