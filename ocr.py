@@ -4,7 +4,7 @@ from openpyxl import Workbook
 import os
 import re
 import cv2
-
+import datetime
 
 pytesseract.pytesseract.tesseract_cmd = r'c:/Users/Neel Amarnath Mulik/AppData/Local/Programs/Tesseract-OCR/tesseract.exe'
 
@@ -105,7 +105,7 @@ def template_matching_license_number(img):
     return extracted_text.strip()
 
 
-folder_path = r'C:/Users/Neel Amarnath Mulik/Mini4/mini-project-b/example'
+folder_path = r'C:/Users/Neel Amarnath Mulik/Mini4/mini-project-b/uploads'
 image_files = [f for f in os.listdir(folder_path) if f.endswith(('.jpg', '.png', '.jpeg'))]
 
 # Sort the image files numerically
@@ -136,12 +136,14 @@ for image_file in image_files:
 
     name, licence_number, validity = find_name_licence_validity(extracted_text)
 
+    validity_date = datetime.datetime.strptime(validity, '%d-%m-%Y')
+
     if not licence_number:
         licence_number = extract_license_number(image_path)
 
     ws.cell(row=row_idx, column=1, value=name)
     ws.cell(row=row_idx, column=2, value=licence_number)
-    ws.cell(row=row_idx, column=3, value=validity)
+    ws.cell(row=row_idx, column=3, value=validity_date)
     ws.cell(row=row_idx, column=4, value=image_file)
 
     row_idx += 1
