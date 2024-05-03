@@ -69,10 +69,11 @@ function DriverForms() {
         formDataToSend
       );
       console.log(response.data);
-      // Optionally, you can redirect the user to another page or show a success message
+      if(response.status >= 200){
+        window.location.href = '/driver';
+      }
     } catch (error) {
       console.error("Error submitting form:", error);
-      // Optionally, you can display an error message to the user
     }
   };
 

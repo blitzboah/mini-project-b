@@ -59,7 +59,9 @@ function LoginDriver() {
       const token = res.data.token;
       document.cookie = `token=${token}; max-age=360000; path=/`;
       console.log(token);
-      window.location.href = '/driverPage';
+      if(res.status){
+        window.location.href = '/driverPage';
+      }
     } catch (error) {
       console.error(error);
       alert(

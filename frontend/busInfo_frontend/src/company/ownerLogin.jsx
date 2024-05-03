@@ -48,7 +48,9 @@ function LoginOwner() {
       const token = res.data.token;
       document.cookie = `token=${token}; max-age=360000; path=/`;
       console.log(token);
-      window.location.href = '/companyPage';
+      if(response.status >= 200){
+        window.location.href = '/companyPage';
+      }
     } catch (error) {
       console.error(error);
       alert(

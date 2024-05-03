@@ -31,7 +31,13 @@ function VehicleRegistration() {
         formData,
         { withCredentials: true }
       );
-      console.log("Response:", response.data);
+      if(response.status >= 200){
+        window.alert("The Vehicle was registered successfully.");
+        setFormData({
+        busNumber: "",
+        permitExpiry: "",
+        });
+      }
     } catch (error) {
       console.error("Error registering vehicle:", error);
     }

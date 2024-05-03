@@ -10,6 +10,32 @@ import axios from "axios";
 import "./bg.css";
 
 function Navbar() {
+  const handleLogout = async () => {
+    try {
+      const token = getCookie("token"); 
+      if (!token) {
+        console.error("Token not found in cookie.");
+        return;
+      }
+      await axios.post("http://localhost:3000/api/users/logout", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      document.cookie =
+        "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"; 
+      window.location.href = "/company";
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
+  };
+
+  const getCookie = (name) => {
+    const cookieValue = document.cookie.match(
+      "(^|;)\\s*" + name + "\\s*=\\s*([^;]+)"
+    );
+    return cookieValue ? cookieValue.pop() : null;
+  };
   return (
     <nav className="flex justify-center items-center flex-wrap bg-gray-900 p-4">
       <Link to="/" className="text-cyan-400 underline-none mr-auto text-xl font-serif">
@@ -22,9 +48,12 @@ function Navbar() {
         >
           Home
         </Link>
-        <Link to="/" className="text-white hover:text-blue-500 underline-none font-sans">
+        <button
+          onClick={handleLogout}
+          className="text-white hover:text-blue-500 underline-none font-sans"
+        >
           Logout
-        </Link>
+        </button>
       </div>
     </nav>
   );

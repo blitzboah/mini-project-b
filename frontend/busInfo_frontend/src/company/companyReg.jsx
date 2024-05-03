@@ -60,6 +60,13 @@ function UserRegistrationForm() {
       );
       if (response.status === 201 || 200) {
         window.alert("Company successfully registered. Please check your email to verify yourself.");
+        setFormData({
+          companyName: "",
+          email: "",
+          address: "",
+          phoneNo: "",
+          password: "",
+        });
       }
     } catch (error) {
       console.error("Error submitting form:", error);

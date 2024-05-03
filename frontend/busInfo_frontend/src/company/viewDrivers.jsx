@@ -4,12 +4,43 @@ import { Link } from 'react-router-dom';
 
 
 function Navbar() {
+  const handleLogout = async () => {
+    try {
+      const token = getCookie("token"); 
+      if (!token) {
+        console.error("Token not found in cookie.");
+        return;
+      }
+      await axios.post("http://localhost:3000/api/users/logout", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      document.cookie =
+        "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"; 
+      window.location.href = "/company";
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
+  };
+
+  const getCookie = (name) => {
+    const cookieValue = document.cookie.match(
+      "(^|;)\\s*" + name + "\\s*=\\s*([^;]+)"
+    );
+    return cookieValue ? cookieValue.pop() : null;
+  };
   return (
     <nav className="flex justify-center items-center flex-wrap bg-gray-900 p-4 font-serif"> {/* Apply font-serif class to the nav element */}
       <Link to="/" className="text-cyan-400 underline-none mr-auto text-xl">BusInfo</Link>
       <div className="flex justify-center items-center space-x-4">
         <Link to="/" className="text-white hover:text-blue-500 underline-none">Home</Link>
-        <Link to="/" className="text-white hover:text-blue-500 underline-none">Logout</Link>
+        <button
+          onClick={handleLogout}
+          className="text-white hover:text-blue-500 underline-none font-sans"
+        >
+          Logout
+        </button>
       </div>
     </nav>
   );
