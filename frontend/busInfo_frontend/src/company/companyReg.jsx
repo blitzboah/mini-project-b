@@ -58,7 +58,9 @@ function UserRegistrationForm() {
         "http://localhost:3000/api/users/register",
         userData
       );
-      console.log(response.data);
+      if (response.status === 201 || 200) {
+        window.alert("Company successfully registered. Please check your email to verify yourself.");
+      }
     } catch (error) {
       console.error("Error submitting form:", error);
     }

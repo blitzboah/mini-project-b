@@ -12,8 +12,8 @@ function Navbar() {
     <nav className="flex justify-center items-center flex-wrap bg-gray-900 p-4">
       <Link to="/" className="text-cyan-400 font-serif underline-none mr-auto text-xl">BusInfo</Link>
       <div className="flex justify-center items-center space-x-4">
-        <Link to="/company" className="text-white font-sans hover:text-blue-500 underline-none">Company</Link>
-        <Link to="/driver" className="text-white font-sans hover:text-blue-500 underline-none">Driver</Link>
+        <Link to="/company" className="text-white font-sans hover:text-blue-500 underline-none">Company Section</Link>
+        <Link to="/driver" className="text-white font-sans hover:text-blue-500 underline-none">Driver Section</Link>
       </div>
     </nav>
   );

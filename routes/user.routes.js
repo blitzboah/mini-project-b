@@ -10,6 +10,7 @@ import {
   register,
   sendDrivers,
   sendVehicels,
+  verifyEmail,
 } from "../controller/user.controller.js";
 import jwt from "jsonwebtoken";
 
@@ -46,6 +47,7 @@ router.post("/registerVehicle", regiserVehicles);
 router.get("/viewDrivers", sendDrivers);
 router.post("/logout", logout);
 router.get("/viewVehicles", sendVehicels);
+router.get("/verify-email", verifyEmail);
 
 db.connect();
 

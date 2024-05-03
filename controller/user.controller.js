@@ -2,6 +2,8 @@ import bcrypt from "bcrypt";
 import db from "../database/db.js";
 import express from "express";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
+import nodemailer from "nodemailer";
 
 const app = express();
 const saltRounds = 10;
@@ -34,21 +36,47 @@ const register = async (req, res, next) => {
 
     if (checkResult.rows.length > 0) {
       res
-        .status(409)
-        .json({ message: "Email already exists. Try logging in." });
+       .status(409)
+       .json({ message: "Email already exists. Try logging in." });
     } else {
       bcrypt.hash(password, saltRounds, async (err, pass) => {
         if (err) {
           console.error("Error hashing password:", err);
           res
-            .status(500)
-            .json({ message: "An error occurred while hashing the password" });
+           .status(500)
+           .json({ message: "An error occurred while hashing the password" });
         } else {
           console.log("Hashed Password:", pass);
+          const verificationToken = crypto.randomBytes(32).toString('hex');
           const result = await db.query(
-            "INSERT INTO company (company_name, company_address, company_email, company_phno, paswd) VALUES ($1, $2, $3, $4, $5) RETURNING *",
-            [name, address, email, phno, pass]
+            "INSERT INTO company (company_name, company_address, company_email, company_phno, paswd, verification_token, email_verified) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
+            [name, address, email, phno, pass, verificationToken, false]
           );
+
+          // Send verification email
+          const transporter = nodemailer.createTransport({
+            host: 'smtp.gmail.com',
+            port: 587,
+            auth: {
+              user: process.env.EMAIL,
+              pass: process.env.SMTP_PASSWORD
+            }
+          });
+
+          const mailOptions = {
+            from: process.env.EMAIL,
+            to: email,
+            subject: 'Verify your email address',
+            text: `Please click on the following link to verify your email address: http://localhost:3000/api/users/verify-email?token=${verificationToken}`
+          };
+
+          transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+              return console.log(error);
+            }
+            console.log('Email sent: ' + info.response);
+          });
+
           const userRegisteredCheck = result.rows.length;
           if (userRegisteredCheck > 0) {
             console.log(`User is registered successfully.`);
@@ -69,6 +97,30 @@ const register = async (req, res, next) => {
   }
 };
 
+const verifyEmail = async (req, res) => {
+  const token = req.query.token;
+  try {
+    const result = await db.query(
+      "SELECT * FROM company WHERE verification_token = $1",
+      [token]
+    );
+
+    if (result.rows.length === 0) {
+      res.status(404).json({ message: 'Invalid verification token' });
+    } else {
+      const user = result.rows[0];
+      await db.query(
+        "UPDATE company SET email_verified = true, verification_token = null WHERE c_id = $1",
+        [user.c_id]
+      );
+      res.status(200).json({ message: 'Email verified successfully' });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
 const login = async (req, res, cb) => {
   const email = req.body.email;
   const password = req.body.password;
@@ -77,36 +129,40 @@ const login = async (req, res, cb) => {
       "SELECT * FROM company WHERE company_email= $1",
       [email]
     );
+
     if (isUserRegistered.rows.length === 0) {
       console.log(`User is not registered! please register yourself first`);
+      res.status(401).json({ message: 'User not registered. Please register first.' });
     } else {
       const user = isUserRegistered.rows[0];
-      const storedPassword = user.paswd;
-      bcrypt.compare(password, storedPassword, async (err, result) => {
-        if (err) {
-          console.log(` ERROR!! in hashing the password `);
-          res
-            .status(500)
-            .json({ message: "Error while comparing the hash passwords!" });
-        } else {
-          if (result) {
-            console.log(`User successfully logged in`);
-            const token = generateToken(user);
-            res.cookie("token", token, {
-              httpOnly: true,
-              maxAge: 3600000,
-            });
-            res.status(200).json({
-              success: true,
-              message: `User was logged in Successfully`,
-              user,
-              token,
-            });
+      if (!user.email_verified) {
+        res.status(401).json({ message: 'Email not verified. Please verify your email address.' });
+      } else {
+        const storedPassword = user.paswd;
+        bcrypt.compare(password, storedPassword, async (err, result) => {
+          if (err) {
+            console.log(` ERROR!! in hashing the password `);
+            res.status(500).json({ message: "Error while comparing the hash passwords!" });
           } else {
-            res.status(401).json({ message: "Incorrect Password" });
+            if (result) {
+              console.log(`User successfully logged in`);
+              const token = generateToken(user);
+              res.cookie("token", token, {
+                httpOnly: true,
+                maxAge: 3600000,
+              });
+              res.status(200).json({
+                success: true,
+                message: `User was logged in Successfully`,
+                user,
+                token,
+              });
+            } else {
+              res.status(401).json({ message: "Incorrect Password" });
+            }
           }
-        }
-      });
+        });
+      }
     }
   } catch (error) {
     console.log(error);
@@ -115,7 +171,7 @@ const login = async (req, res, cb) => {
 };
 
 const assignTasks = async (req, res, cb) => {
-  let tasksAssigned = false; // Flag to track if tasks were successfully assigned
+  let tasksAssigned = false; 
 
   try {
     console.log("Starting assignTasks function");
@@ -125,12 +181,10 @@ const assignTasks = async (req, res, cb) => {
     const destinationCity = req.body.destinationCity;
     const startTime = req.body.startTime;
     console.log(startTime);
-    // Check if all required fields are provided
     if (!tripDate || !arrivingCity || !destinationCity || !startTime) {
       return res.status(400).json({ message: "Incomplete information." });
     }
 
-    // Get the company ID of the logged-in user
     const companyId = await getLoggedInUserCompanyId(req);
 
     console.log("After getting company ID");
@@ -138,28 +192,21 @@ const assignTasks = async (req, res, cb) => {
     let assignedTrip = null;
     let driver = null;
 
-    // Fetch all drivers who are verified and belong to the same company
     const driverDetails = await db.query("SELECT * FROM drivers WHERE c_id = $1 AND driver_verified = TRUE", [companyId]);
     const drivers = driverDetails.rows;
 
-    // Check if any verified drivers are available
     if (drivers.length === 0) {
       return res.status(404).json({ message: "No verified drivers available." });
     }
 
-    // Loop until a driver is assigned or all verified drivers are checked
     for (const driver of drivers) {
-      // Check if the driver's driving hours are less than 48
       if (driver.driving_hrs < 48) {
-        // Assign the trip to the selected driver
         assignedTrip = await db.query(
           "INSERT INTO assigned_trips (d_id, trip_date, trip_arrivalcity, trip_destinationcity, trip_starttime) VALUES ($1, $2, $3, $4, $5)",
           [driver.d_id, tripDate, arrivingCity, destinationCity, startTime]
         );
-        // Update flag to indicate tasks were successfully assigned
         tasksAssigned = true;
         console.log("Tasks assigned successfully.");
-        break; // Exit the loop if a driver is assigned
       }
     }
 
@@ -169,10 +216,8 @@ const assignTasks = async (req, res, cb) => {
       console.log("Failed to assign tasks. No eligible driver found.");
     }
   } catch (error) {
-    // Log the error
     console.error("Error assigning tasks:", error);
   } finally {
-    // Send response based on whether tasks were successfully assigned
     if (tasksAssigned) {
       return res.status(200).json({ message: "Tasks assigned successfully." });
     } else {
@@ -263,5 +308,6 @@ export {
   sendDrivers,
   regiserVehicles,
   sendVehicels,
+  verifyEmail,
   logout,
 };
