@@ -11,89 +11,56 @@ pytesseract.pytesseract.tesseract_cmd = r'c:/Users/Neel Amarnath Mulik/AppData/L
 def extract_text_from_image(image_path):
     img = Image.open(image_path)
     
+    # Enhance image for better OCR
     enhancer = ImageEnhance.Contrast(img)
     img = enhancer.enhance(1.5)
     
     img = img.resize((img.width * 2, img.height * 2), Image.LANCZOS)
 
+    # Perform OCR
     extracted_text = pytesseract.image_to_string(img)
     
     confidence = pytesseract.image_to_data(img, output_type=pytesseract.Output.DICT)
     avg_confidence = sum(map(float, confidence['conf'])) / len(confidence['conf']) if confidence['conf'] else 0
-    # print("text ", extracted_text, avg_confidence)
     return extracted_text, avg_confidence
 
 def find_name_licence_validity(text):
-    lines = text.split('\n')
     name = ''
     licence_number = ''
     validity = ''
-    lice=''
-    validity1=''
     
-    
-
-    # print("in fun", text)
-    alphanumeric_pattern = re.compile(r'\b[A-Za-z0-9]{6,20}\b')  # Updated regex pattern
-    #print("text", text)
+    # Define patterns for matching
     licence_keywords = ['licence number', 'dl no', 'dl number']
-    
+    name_keywords = ['name', 'driver name']
+    validity_keywords = ['valid', 'expiry', 'valid till']
 
-    for line in lines:
-        # match_alphanumeric = alphanumeric_pattern.findall(line)
+    for line in text.split('\n'):
+        # Extract licence number
+        if any(keyword in line.lower() for keyword in licence_keywords):
+            match = re.search(r'([A-Za-z]{2}\s?-?\s?\d{2}\s?-?\s?\d{4}\s?-?\s?\d+)', line)  # Match license number pattern
+            if match:
+                licence_number = match.group().strip()
 
-        # for potential_licence in match_alphanumeric:
-            # print("licence", potential_licence)
+        # Extract name
+        if any(keyword in line.lower() for keyword in name_keywords):
+            match = re.search(r'(?:name|driver name)\s*[:=]?\s*(.*)', line, re.IGNORECASE)
+            if match:
+                name = match.group(1).strip()
 
-            # if 9 <= len(potential_licence) <= 20:
-            #     # print("licence 2", potential_licence)
-            #     licence_number = potential_licence
-        if 'licence no.' in line.lower() or 'dl no' in line.lower()  and '=' not in line: 
-            licence_number = line.split(':')[-1].strip()
-            lice=licence_number[:17]
-                
+        # Extract validity
+        if any(keyword in line.lower() for keyword in validity_keywords):
+            match = re.search(r':\s*(\d{2}-\d{2}-\d{4})', line)
+            if match:
+                validity = match.group(1).strip()
 
-        if 'valid' in line.lower() or 'expiry' in line.lower() or 'valid till' in line.lower() or 'validity' in line.lower():
-            validity = line.split(':')[-1].strip()
-            validity1=validity[:10]
-            
+    return name, licence_number, validity
 
-        if 'name' in line.lower() and '=' not in line:
-            name = line.split(':')[-1].strip() 
-          
-            
-
-
-        for keyword in licence_keywords:
-            if keyword in line.lower() and '=' not in line:
-                licence_number = line.split(':')[-1].strip()
-               
-    return name, lice, validity1
 
 def extract_license_number(image_path):
-    
-    img = cv2.imread(image_path)
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
-    _, binary_img = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
-
-    contours, _ = cv2.findContours(binary_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-    for contour in contours:
-        x, y, w, h = cv2.boundingRect(contour)
-        
-        if 0.5 < w / h < 2.0 and 50 < w < 300 and 10 < h < 100:
-            license_region = gray[y:y + h, x:x + w]
-            
-            extracted_text = pytesseract.image_to_string(license_region)
-            if extracted_text.strip():
-                return extracted_text.strip()
-
-    return None
-
-def template_matching_license_number(img):
+    img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
     template_img = cv2.imread(r"C:/Users/Neel Amarnath Mulik/Downloads/license-template.jpeg", cv2.IMREAD_GRAYSCALE)
 
+    # Template Matching
     result = cv2.matchTemplate(img, template_img, cv2.TM_CCOEFF_NORMED)
     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
 
@@ -101,9 +68,9 @@ def template_matching_license_number(img):
     w, h = template_img.shape[::-1]
     license_region = img[y:y + h, x:x + w]
 
+    # OCR on the extracted region
     extracted_text = pytesseract.image_to_string(license_region)
     return extracted_text.strip()
-
 
 folder_path = r'C:/Users/Neel Amarnath Mulik/Mini4/mini-project-b/uploads'
 image_files = [f for f in os.listdir(folder_path) if f.endswith(('.jpg', '.png', '.jpeg'))]
@@ -112,9 +79,6 @@ image_files = [f for f in os.listdir(folder_path) if f.endswith(('.jpg', '.png',
 image_files.sort(key=lambda x: int(re.search(r'\d+', x).group()))
 
 # Initialize row index for writing to Excel
-
-
-
 row_idx = 2
 wb = Workbook()
 ws = wb.active
@@ -122,7 +86,6 @@ ws.cell(row=1, column=1, value='Name')
 ws.cell(row=1, column=2, value='Licence Number')
 ws.cell(row=1, column=3, value='Validity')
 ws.cell(row=1, column=4, value='File name')  # Add a new column for file names
-
 
 for image_file in image_files:
     image_path = os.path.join(folder_path, image_file)
@@ -136,10 +99,12 @@ for image_file in image_files:
 
     name, licence_number, validity = find_name_licence_validity(extracted_text)
 
-    validity_date = datetime.datetime.strptime(validity, '%d-%m-%Y')
-
+    # Refine licence number extraction using template matching
     if not licence_number:
         licence_number = extract_license_number(image_path)
+
+    # Convert validity to datetime object
+    validity_date = datetime.datetime.strptime(validity, '%d-%m-%Y') if validity else None
 
     ws.cell(row=row_idx, column=1, value=name)
     ws.cell(row=row_idx, column=2, value=licence_number)
