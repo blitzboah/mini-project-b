@@ -1,24 +1,24 @@
-import db from "../database/db.js";
 import { Router } from "express";
 import express from "express";
+import bodyParser from "body-parser";
+import multer from "multer";
 import {
   login,
   logout,
   register,
   sendTrips,
   tripsCompleted,
-  updateDriversLicExp,
+  updateDriversLicExp
 } from "../controller/driver.controller.js";
-import multer from "multer";
-import crypto from "crypto";
 import jwt from "jsonwebtoken";
-
-const storage = multer.memoryStorage();
-
-const upload = multer({ storage });
 
 const router = Router();
 
+// Configure multer for file uploads
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+
+router.use(express.json());
 router.use(express.urlencoded({ extended: true }));
 
 const isAuthenticated = (req, res, next) => {
@@ -32,7 +32,7 @@ const isAuthenticated = (req, res, next) => {
       } else {
         console.log("Decoded token:", decoded);
         req.user = decoded.user;
-        res.send(200).json({ message: "The user is authenticated" });
+        res.status(200).json({ message: "The user is authenticated" });
         next();
       }
     });
@@ -42,15 +42,11 @@ const isAuthenticated = (req, res, next) => {
   }
 };
 
-router.get("/isAuthenticated", isAuthenticated);
-
-router.get("/trips", sendTrips);
 router.post("/login", login);
 router.post("/register", upload.single("licensePhoto"), register);
+router.post("/logout", logout);
+router.get("/trips", sendTrips);
 router.post("/updateTripEndTime", tripsCompleted);
 router.patch("/updateDriverLicExp", updateDriversLicExp);
-router.post("/logout", logout);
-
-db.connect();
 
 export default router;

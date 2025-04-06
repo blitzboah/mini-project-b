@@ -49,6 +49,4 @@ router.post("/logout", logout);
 router.get("/viewVehicles", sendVehicels);
 router.get("/verify-email", verifyEmail);
 
-db.connect();
-
 export default router;

@@ -3,14 +3,15 @@ import driverRoutes from "./routes/driver.routes.js";
 import defaultRoutes from "./routes/default.routes.js";
 import express from "express";
 import session from "express-session";
-import db from "./database/db.js";
+import connectToDb from "./database/db.js";
 import bodyParser from "body-parser";
 import cron from "node-cron";
 import { resetDrivingHours, sendDriverStatus } from "./controller/driver.controller.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 
-db.connect();
+// Connect to MongoDB
+connectToDb();
 
 const port = 3000;
 const app = express();
@@ -31,7 +32,7 @@ app.use(
   })
 );
 
-cron.schedule('06 21 * * 5',sendDriverStatus);
+cron.schedule('06 21 * * 5', sendDriverStatus);
 cron.schedule('42 1 * * 0', resetDrivingHours);
 app.use("/", defaultRoutes);
 app.use("/api/users", userRoutes);
